@@ -8,7 +8,6 @@
     :root{
       --bg:#f5f5f7;
       --panel:#ffffff;
-      --panel-2:#fbfbfd;
       --text:#1d1d1f;
       --muted:#6e6e73;
       --line:#d2d2d7;
@@ -106,8 +105,7 @@
       box-shadow:0 1px 2px rgba(0,0,0,.03);
     }
 
-    .field,
-    .select{
+    .field,.select{
       width:100%;
       border-radius:12px;
       box-shadow:none;
@@ -135,8 +133,6 @@
       color:var(--accent-hover);
     }
 
-    .sheet{background:transparent}
-
     .section-heading{
       margin:0 0 10px;
       font-size:14px;
@@ -146,22 +142,6 @@
       color:var(--muted);
     }
 
-    .planner-layout{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:16px;
-      margin-bottom:16px;
-      align-items:start;
-    }
-
-    .two-col{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:16px;
-      margin-bottom:16px;
-      align-items:start;
-    }
-
     .box{
       border:1px solid var(--line);
       background:var(--panel);
@@ -169,6 +149,7 @@
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       overflow:hidden;
+      margin-bottom:16px;
     }
 
     .box-title{
@@ -185,18 +166,19 @@
     .box-pad{padding:16px}
 
     .today-card{
+      border:1px solid var(--line);
+      padding:16px;
+      background:var(--panel);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
       margin-bottom:14px;
     }
 
     .today-grid{
       display:grid;
-      grid-template-columns:1.3fr .85fr .85fr;
+      grid-template-columns:1.2fr .8fr;
       gap:16px;
       align-items:start;
-    }
-
-    .today-main .summary-value{
-      font-size:32px;
     }
 
     .today-sub{
@@ -204,11 +186,42 @@
       padding-left:16px;
     }
 
+    .summary-label{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--muted);
+      margin-bottom:6px;
+      font-weight:700;
+    }
+
+    .summary-value{
+      font-size:30px;
+      line-height:1.1;
+      font-weight:700;
+      letter-spacing:-0.03em;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .summary-note{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:4px;
+      line-height:1.35;
+    }
+
     .builder-grid{
       display:grid;
-      grid-template-columns:1fr 1fr 1fr 1fr 1fr;
+      grid-template-columns:repeat(5,minmax(0,1fr));
       gap:10px;
       align-items:end;
+    }
+
+    .warmup-layout{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      align-items:start;
     }
 
     .warmup-controls{
@@ -252,7 +265,7 @@
       background:#fcfcfd;
     }
 
-    td input, td select, td textarea{
+    td input{
       width:100%;
       border:1px solid transparent;
       background:transparent;
@@ -266,12 +279,12 @@
       appearance:none;
     }
 
-    td input:hover, td select:hover, td textarea:hover{
+    td input:hover{
       background:#fafafc;
       border-color:#f0f0f2;
     }
 
-    td input:focus, td select:focus, td textarea:focus{
+    td input:focus{
       background:#fff;
       border-color:rgba(0,113,227,.35);
       box-shadow:0 0 0 3px rgba(0,113,227,.12);
@@ -329,75 +342,6 @@
       color:var(--accent-hover);
     }
 
-    .summary-card{
-      border:1px solid var(--line);
-      padding:16px;
-      background:var(--panel);
-      min-height:92px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-    }
-
-    .summary-label{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      color:var(--muted);
-      margin-bottom:6px;
-      font-weight:700;
-    }
-
-    .summary-value{
-      font-size:28px;
-      line-height:1.1;
-      font-weight:700;
-      letter-spacing:-0.03em;
-      font-variant-numeric:tabular-nums;
-    }
-
-    .summary-note{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:4px;
-      line-height:1.35;
-    }
-
-    .cashflow-row{
-      margin:8px 0 18px;
-      border:1px solid var(--line);
-      background:linear-gradient(180deg,#ffffff 0%,#fafafc 100%);
-      border-radius:var(--radius);
-      padding:16px 18px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      box-shadow:var(--shadow);
-    }
-
-    .cashflow-title{
-      font-size:16px;
-      font-weight:700;
-      letter-spacing:-0.01em;
-    }
-
-    .cashflow-sub{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:3px;
-    }
-
-    .cashflow-value{
-      font-size:30px;
-      font-weight:700;
-      letter-spacing:-0.03em;
-      font-variant-numeric:tabular-nums;
-    }
-
     .total-row td{
       font-weight:700;
       background:#f7f8fa;
@@ -409,42 +353,6 @@
       white-space:nowrap;
       font-variant-numeric:tabular-nums;
     }
-
-    .footer-summary{
-      border:1px solid var(--line);
-      background:var(--panel);
-      border-radius:var(--radius);
-      padding:16px 18px;
-      display:flex;
-      justify-content:flex-end;
-      gap:24px;
-      flex-wrap:wrap;
-      box-shadow:var(--shadow);
-    }
-
-    .footer-item{
-      min-width:190px;
-      text-align:right;
-    }
-
-    .footer-label{
-      font-size:11px;
-      text-transform:uppercase;
-      color:var(--muted);
-      margin-bottom:4px;
-      letter-spacing:.08em;
-      font-weight:700;
-    }
-
-    .footer-value{
-      font-size:30px;
-      font-weight:700;
-      letter-spacing:-0.03em;
-      font-variant-numeric:tabular-nums;
-    }
-
-    .hidden{display:none !important}
-    .empty{text-align:center;color:var(--muted);padding:16px 0;font-size:13px}
 
     .note-area{
       width:100%;
@@ -545,11 +453,48 @@
       font-variant-numeric:tabular-nums;
     }
 
+    .footer-summary{
+      border:1px solid var(--line);
+      background:var(--panel);
+      border-radius:var(--radius);
+      padding:16px 18px;
+      display:flex;
+      justify-content:flex-end;
+      gap:24px;
+      flex-wrap:wrap;
+      box-shadow:var(--shadow);
+    }
+
+    .footer-item{
+      min-width:190px;
+      text-align:right;
+    }
+
+    .footer-label{
+      font-size:11px;
+      text-transform:uppercase;
+      color:var(--muted);
+      margin-bottom:4px;
+      letter-spacing:.08em;
+      font-weight:700;
+    }
+
+    .footer-value{
+      font-size:30px;
+      font-weight:700;
+      letter-spacing:-0.03em;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .hidden{display:none !important}
+    .empty{text-align:center;color:var(--muted);padding:16px 0;font-size:13px}
+
     @media (max-width:1100px){
       .builder-grid{
-        grid-template-columns:1fr 1fr 1fr;
+        grid-template-columns:repeat(3,minmax(0,1fr));
       }
-      .today-grid{
+      .today-grid,
+      .warmup-layout{
         grid-template-columns:1fr;
       }
       .today-sub{
@@ -568,13 +513,11 @@
         padding:6px 6px;
       }
 
-      .summary-value,.cashflow-value,.footer-value{
+      .summary-value,.footer-value{
         font-size:24px;
       }
 
-      .builder-grid,
-      .warmup-controls,
-      .two-col{
+      .builder-grid{
         grid-template-columns:1fr 1fr;
       }
 
@@ -589,9 +532,7 @@
     }
 
     @media (max-width:560px){
-      .builder-grid,
-      .warmup-controls,
-      .two-col{
+      .builder-grid{
         grid-template-columns:1fr;
       }
     }
@@ -619,130 +560,113 @@
       <div id="sessionView">
         <h2 class="section-heading">Workout Setup</h2>
 
-        <div class="planner-layout">
-          <div>
-            <div class="summary-card today-card">
-              <div class="today-grid">
-                <div class="today-main">
-                  <div class="summary-label">Today’s Workout</div>
-                  <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
-                  <div class="summary-note" id="templateNote">Standard novice progression template.</div>
-                </div>
-                <div class="today-sub">
-                  <div class="summary-label">Session Status</div>
-                  <div class="summary-value" id="sessionStatus">Planned</div>
-                  <div class="summary-note" id="sessionStatusNote">No lifts marked complete yet.</div>
-                </div>
-                <div class="today-sub">
-                  <div class="summary-label">Current Template</div>
-                  <div class="summary-value" id="sexSummary">Male</div>
-                  <div class="summary-note" id="sexSummaryNote">3 × 5 main lifts.</div>
-                </div>
-              </div>
+        <div class="today-card">
+          <div class="today-grid">
+            <div class="today-main">
+              <div class="summary-label">Today’s Workout</div>
+              <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
+              <div class="summary-note" id="templateNote">Standard novice progression template.</div>
             </div>
-
-            <div class="box" style="margin-bottom:14px;">
-              <div class="box-title">Session Builder</div>
-              <div class="box-body">
-                <div class="box-pad">
-                  <div class="builder-grid">
-                    <div>
-                      <label class="control-label" for="unitSelect">Units</label>
-                      <select id="unitSelect" class="select">
-                        <option value="kg">kg</option>
-                        <option value="lb">lb</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="control-label" for="phaseSelect">Workout Type</label>
-                      <select id="phaseSelect" class="select">
-                        <option value="Phase 1">Phase 1</option>
-                        <option value="Phase 2">Phase 2</option>
-                        <option value="Phase 3">Phase 3</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="control-label" for="daySelect">Day</label>
-                      <select id="daySelect" class="select">
-                        <option value="Day A">Day A</option>
-                        <option value="Day B">Day B</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="control-label" for="sexSelect">Sex</label>
-                      <select id="sexSelect" class="select">
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label class="control-label" for="bodyweightInput">Bodyweight</label>
-                      <input id="bodyweightInput" class="field" type="number" step="0.1" placeholder="Optional">
-                    </div>
-                  </div>
-                </div>
-
-                <table>
-                  <colgroup>
-                    <col style="width:42%">
-                    <col style="width:10%">
-                    <col style="width:10%">
-                    <col style="width:16%">
-                    <col style="width:8%">
-                    <col style="width:14%">
-                  </colgroup>
-                  <thead>
-                    <tr>
-                      <th>Exercise</th>
-                      <th>Sets</th>
-                      <th>Reps</th>
-                      <th>Weight</th>
-                      <th>Done</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody id="exerciseTable"></tbody>
-                  <tfoot>
-                    <tr class="total-row">
-                      <td>Total</td>
-                      <td class="total-value" id="totalSets">0</td>
-                      <td class="total-value" id="totalReps">0</td>
-                      <td class="total-value" id="totalWeight">—</td>
-                      <td class="total-value" id="completionRate">0%</td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
-
-                <button class="add-row" type="button" id="addExercise">+ Add Exercise Row</button>
-              </div>
-            </div>
-
-            <div class="box">
-              <div class="box-title">Session Notes</div>
-              <div class="box-body">
-                <div class="box-pad">
-                  <textarea id="notesInput" class="note-area" placeholder="Log how the session felt, cues, missed reps, recovery notes, or next-session targets."></textarea>
-                </div>
-              </div>
+            <div class="today-sub">
+              <div class="summary-label">Current Template</div>
+              <div class="summary-value" id="sexSummary">Male</div>
+              <div class="summary-note" id="sexSummaryNote">3 × 5 main lifts.</div>
             </div>
           </div>
         </div>
 
-        <div class="cashflow-row">
-          <div>
-            <div class="cashflow-title">Session Volume</div>
-            <div class="cashflow-sub">(Completed lifts × sets × reps × weight)</div>
+        <div class="box">
+          <div class="box-title">Session Builder</div>
+          <div class="box-body">
+            <div class="box-pad">
+              <div class="builder-grid">
+                <div>
+                  <label class="control-label" for="unitSelect">Units</label>
+                  <select id="unitSelect" class="select">
+                    <option value="kg">kg</option>
+                    <option value="lb">lb</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="control-label" for="phaseSelect">Workout Type</label>
+                  <select id="phaseSelect" class="select">
+                    <option value="Phase 1">Phase 1</option>
+                    <option value="Phase 2">Phase 2</option>
+                    <option value="Phase 3">Phase 3</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="control-label" for="daySelect">Day</label>
+                  <select id="daySelect" class="select">
+                    <option value="Day A">Day A</option>
+                    <option value="Day B">Day B</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="control-label" for="sexSelect">Sex</label>
+                  <select id="sexSelect" class="select">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="control-label" for="bodyweightInput">Bodyweight</label>
+                  <input id="bodyweightInput" class="field" type="number" step="0.1" placeholder="Optional">
+                </div>
+              </div>
+            </div>
+
+            <table>
+              <colgroup>
+                <col style="width:42%">
+                <col style="width:10%">
+                <col style="width:10%">
+                <col style="width:16%">
+                <col style="width:8%">
+                <col style="width:14%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Exercise</th>
+                  <th>Sets</th>
+                  <th>Reps</th>
+                  <th>Weight</th>
+                  <th>Done</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="exerciseTable"></tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td>Total</td>
+                  <td class="total-value" id="totalSets">0</td>
+                  <td class="total-value" id="totalReps">0</td>
+                  <td class="total-value" id="totalWeight">—</td>
+                  <td class="total-value" id="completionRate">0%</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <button class="add-row" type="button" id="addExercise">+ Add Exercise Row</button>
           </div>
-          <div class="cashflow-value" id="sessionVolumeHero">0 kg</div>
+        </div>
+
+        <div class="box">
+          <div class="box-title">Session Notes</div>
+          <div class="box-body">
+            <div class="box-pad">
+              <textarea id="notesInput" class="note-area" placeholder="Log how the session felt, cues, missed reps, recovery notes, or next-session targets."></textarea>
+            </div>
+          </div>
         </div>
 
         <h2 class="section-heading">Squat Warm-Up Calculator</h2>
-        <div class="two-col">
+        <div class="warmup-layout">
           <div class="box">
             <div class="box-title">Calculator</div>
             <div class="box-body">
@@ -780,7 +704,7 @@
               <div class="box-pad">
                 <div class="summary-label">How it works</div>
                 <div class="summary-note" style="font-size:14px;line-height:1.5;">
-                  The warm-up calculator now uses the weight entered in your squat row automatically.
+                  The warm-up calculator uses the weight entered in your squat row automatically.
                   Weights round to the nearest <span id="roundingLabel">2.5 kg</span>.
                 </div>
 
@@ -840,8 +764,8 @@
                   <th>Phase</th>
                   <th>Day</th>
                   <th>Lifts</th>
-                  <th>Volume</th>
-                  <th>Status</th>
+                  <th>Completion</th>
+                  <th>Template</th>
                 </tr>
               </thead>
               <tbody id="historyTable"></tbody>
@@ -853,7 +777,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "starting-strength-tracker-v6";
+    const STORAGE_KEY = "starting-strength-tracker-v7";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -1067,6 +991,44 @@
       return state.sessions[state.selectedDate];
     }
 
+    function getPrimarySquatExercise(session) {
+      const priority = ["Squat", "Light Squat (80%)", "Front Squat"];
+      for (const name of priority) {
+        const found = session.exercises.find(x => String(x.exercise).trim().toLowerCase() === name.toLowerCase());
+        if (found) return found;
+      }
+      return session.exercises.find(x => String(x.exercise).toLowerCase().includes("squat")) || null;
+    }
+
+    function sessionMetrics(session) {
+      const exercises = session.exercises || [];
+      const totalSets = exercises.reduce((sum, r) => sum + safeNumber(r.sets), 0);
+      const totalReps = exercises.reduce((sum, r) => sum + safeNumber(r.reps), 0);
+      const completedLifts = exercises.filter(r => r.completed).length;
+      const completionRate = exercises.length > 0 ? Math.round((completedLifts / exercises.length) * 100) : 0;
+
+      return {
+        totalSets,
+        totalReps,
+        completedLifts,
+        totalLifts: exercises.length,
+        completionRate
+      };
+    }
+
+    function nextJump(weight, type) {
+      const unit = state.unit;
+      const w = safeNumber(weight);
+      if (unit === "kg") {
+        if (type === "upper") return w + 2.5;
+        if (type === "pull") return w + 5;
+        return w + 2.5;
+      }
+      if (type === "upper") return w + 5;
+      if (type === "pull") return w + 10;
+      return w + 5;
+    }
+
     function renderDateLabel() {
       document.getElementById("dateLabel").textContent = displayDate(state.selectedDate);
     }
@@ -1108,49 +1070,6 @@
       `).join("");
     }
 
-    function getPrimarySquatExercise(session) {
-      const priority = ["Squat", "Light Squat (80%)", "Front Squat"];
-      for (const name of priority) {
-        const found = session.exercises.find(x => String(x.exercise).trim().toLowerCase() === name.toLowerCase());
-        if (found) return found;
-      }
-      return session.exercises.find(x => String(x.exercise).toLowerCase().includes("squat")) || null;
-    }
-
-    function sessionMetrics(session) {
-      const exercises = session.exercises || [];
-      const totalSets = exercises.reduce((sum, r) => sum + safeNumber(r.sets), 0);
-      const totalReps = exercises.reduce((sum, r) => sum + safeNumber(r.reps), 0);
-      const completedLifts = exercises.filter(r => r.completed).length;
-      const volume = exercises.reduce((sum, r) => {
-        return sum + (r.completed ? safeNumber(r.sets) * safeNumber(r.reps) * safeNumber(r.weight) : 0);
-      }, 0);
-
-      const completionRate = exercises.length > 0 ? Math.round((completedLifts / exercises.length) * 100) : 0;
-
-      return {
-        totalSets,
-        totalReps,
-        completedLifts,
-        totalLifts: exercises.length,
-        volume,
-        completionRate
-      };
-    }
-
-    function nextJump(weight, type) {
-      const unit = state.unit;
-      const w = safeNumber(weight);
-      if (unit === "kg") {
-        if (type === "upper") return w + 2.5;
-        if (type === "pull") return w + 5;
-        return w + 2.5;
-      }
-      if (type === "upper") return w + 5;
-      if (type === "pull") return w + 10;
-      return w + 5;
-    }
-
     function renderSummary() {
       const session = currentSession();
       const metrics = sessionMetrics(session);
@@ -1166,20 +1085,6 @@
       if (isFemale) templateNote = "Female template uses 5 × 3 main lifts, deadlift 2 × 3, and RDL instead of power clean.";
       document.getElementById("templateNote").textContent = templateNote;
 
-      let status = "Planned";
-      let statusNote = "No lifts marked complete yet.";
-      if (metrics.completionRate > 0 && metrics.completionRate < 100) {
-        status = "In Progress";
-        statusNote = metrics.completedLifts + " of " + metrics.totalLifts + " lifts completed.";
-      }
-      if (metrics.completionRate === 100 && metrics.totalLifts > 0) {
-        status = "Complete";
-        statusNote = "All planned lifts completed.";
-      }
-
-      document.getElementById("sessionStatus").textContent = status;
-      document.getElementById("sessionStatusNote").textContent = statusNote;
-
       document.getElementById("sexSummary").textContent = isFemale ? "Female" : "Male";
       document.getElementById("sexSummaryNote").textContent = isFemale ? "5 × 3 main lifts. Deadlift 2 × 3." : "3 × 5 main lifts.";
 
@@ -1187,7 +1092,6 @@
       document.getElementById("totalReps").textContent = metrics.totalReps;
       document.getElementById("totalWeight").textContent = exercises.some(r => r.weight !== "") ? unit : "—";
       document.getElementById("completionRate").textContent = metrics.completionRate + "%";
-      document.getElementById("sessionVolumeHero").textContent = fmtWeight(metrics.volume, unit);
 
       const squat = getPrimarySquatExercise(session);
       const bench = exercises.find(x => x.exercise.toLowerCase().includes("bench"));
@@ -1201,20 +1105,6 @@
       document.getElementById("nextSquat").textContent = squat && squat.weight !== "" ? fmtWeight(nextJump(squat.weight, "squat"), unit) : "—";
       document.getElementById("nextPressBench").textContent = upper && upper.weight !== "" ? fmtWeight(nextJump(upper.weight, "upper"), unit) : "—";
       document.getElementById("nextPull").textContent = pull && pull.weight !== "" ? fmtWeight(nextJump(pull.weight, "pull"), unit) : "—";
-    }
-
-    function renderSessionForm() {
-      const session = currentSession();
-      document.getElementById("phaseSelect").value = session.phase;
-      document.getElementById("daySelect").value = session.day;
-      document.getElementById("sexSelect").value = session.sex;
-      document.getElementById("bodyweightInput").value = session.bodyweight;
-      document.getElementById("notesInput").value = session.notes;
-      document.getElementById("unitSelect").value = state.unit;
-      document.getElementById("barWeightInput").value = state.barWeight;
-      renderExerciseTable();
-      renderSummary();
-      renderWarmup();
     }
 
     function warmupRows() {
@@ -1257,6 +1147,20 @@
       `).join("");
     }
 
+    function renderSessionForm() {
+      const session = currentSession();
+      document.getElementById("phaseSelect").value = session.phase;
+      document.getElementById("daySelect").value = session.day;
+      document.getElementById("sexSelect").value = session.sex;
+      document.getElementById("bodyweightInput").value = session.bodyweight;
+      document.getElementById("notesInput").value = session.notes;
+      document.getElementById("unitSelect").value = state.unit;
+      document.getElementById("barWeightInput").value = state.barWeight;
+      renderExerciseTable();
+      renderSummary();
+      renderWarmup();
+    }
+
     function renderHistory() {
       const tbody = document.getElementById("historyTable");
       if (!state.history.length) {
@@ -1280,8 +1184,8 @@
             <td>${escapeHtml(item.phase)}</td>
             <td>${escapeHtml(item.day)}</td>
             <td class="history-exercises">${exerciseLines}</td>
-            <td class="readonly-cell">${fmtWeight(item.volume, item.unit)}</td>
             <td class="readonly-cell">${item.completionRate}%</td>
+            <td class="readonly-cell">${item.sex === "female" ? "Female" : "Male"}</td>
           </tr>
         `;
       }).join("");
@@ -1330,7 +1234,6 @@
         bodyweight: session.bodyweight,
         notes: session.notes,
         unit: state.unit,
-        volume: metrics.volume,
         completionRate: metrics.completionRate,
         exercises: JSON.parse(JSON.stringify(session.exercises))
       };
