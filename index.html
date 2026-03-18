@@ -18,8 +18,6 @@
       --soft:#f0f2f5;
       --shadow:0 8px 24px rgba(0,0,0,.06);
       --radius:18px;
-      --success:#177245;
-      --warning:#b05a00;
     }
 
     *{box-sizing:border-box}
@@ -190,18 +188,17 @@
     .box-body{padding:0}
     .box-pad{padding:16px}
 
-    .controls-grid{
+    .compact-controls{
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:12px;
+      grid-template-columns:1fr 1fr 1fr auto auto auto;
+      gap:10px;
+      align-items:end;
     }
 
-    .secondary-controls{
+    .warmup-controls{
       display:grid;
-      grid-template-columns:1fr auto auto;
+      grid-template-columns:1fr 1fr;
       gap:12px;
-      margin-top:12px;
-      align-items:end;
     }
 
     .control-label{
@@ -214,11 +211,8 @@
       font-weight:700;
     }
 
-    .sex-toggle{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
+    .mini-control{
+      min-width:0;
     }
 
     .check-pill{
@@ -232,10 +226,48 @@
       font-size:14px;
       cursor:pointer;
       user-select:none;
+      white-space:nowrap;
+      min-height:44px;
+    }
+
+    .check-pill:hover{
+      border-color:var(--line-strong);
+      background:#fafafc;
     }
 
     .check-pill input{
+      appearance:none;
+      -webkit-appearance:none;
+      width:18px;
+      height:18px;
+      border:1.5px solid var(--line-strong);
+      border-radius:999px;
+      background:#fff;
+      position:relative;
       margin:0;
+      flex:0 0 auto;
+      cursor:pointer;
+    }
+
+    .check-pill input:checked{
+      border-color:var(--accent);
+      background:var(--accent);
+    }
+
+    .check-pill input:checked::after{
+      content:"";
+      position:absolute;
+      left:5px;
+      top:2px;
+      width:4px;
+      height:8px;
+      border:solid #fff;
+      border-width:0 2px 2px 0;
+      transform:rotate(45deg);
+    }
+
+    .check-pill.compact{
+      padding:8px 12px;
     }
 
     table{
@@ -375,6 +407,10 @@
       line-height:1.35;
     }
 
+    .today-card{
+      margin-bottom:14px;
+    }
+
     .cashflow-row{
       margin:8px 0 18px;
       border:1px solid var(--line);
@@ -455,6 +491,7 @@
 
     .hidden{display:none !important}
     .empty{text-align:center;color:var(--muted);padding:16px 0;font-size:13px}
+
     .note-area{
       width:100%;
       min-height:96px;
@@ -480,11 +517,41 @@
       align-items:center;
     }
 
-    .checkbox-wrap input{
-      width:18px;
-      height:18px;
+    .exercise-check{
+      appearance:none;
+      -webkit-appearance:none;
+      width:20px !important;
+      height:20px !important;
+      border:1.5px solid var(--line-strong) !important;
+      border-radius:999px !important;
+      background:#fff !important;
+      position:relative;
+      margin:0 auto;
       cursor:pointer;
-      accent-color:var(--accent);
+      padding:0 !important;
+      box-shadow:none !important;
+    }
+
+    .exercise-check:hover{
+      border-color:var(--accent) !important;
+      background:#f7fbff !important;
+    }
+
+    .exercise-check:checked{
+      border-color:var(--accent) !important;
+      background:var(--accent) !important;
+    }
+
+    .exercise-check:checked::after{
+      content:"";
+      position:absolute;
+      left:6px;
+      top:2px;
+      width:5px;
+      height:9px;
+      border:solid #fff;
+      border-width:0 2px 2px 0;
+      transform:rotate(45deg);
     }
 
     .history-exercises{
@@ -517,6 +584,12 @@
       font-variant-numeric:tabular-nums;
     }
 
+    @media (max-width:1100px){
+      .compact-controls{
+        grid-template-columns:1fr 1fr 1fr 1fr;
+      }
+    }
+
     @media (max-width:1020px){
       .planner-layout,
       .two-col{
@@ -525,10 +598,6 @@
 
       .summary-side{
         grid-template-columns:1fr 1fr;
-      }
-
-      .secondary-controls{
-        grid-template-columns:1fr;
       }
     }
 
@@ -549,8 +618,9 @@
         font-size:24px;
       }
 
-      .controls-grid{
-        grid-template-columns:1fr;
+      .compact-controls,
+      .warmup-controls{
+        grid-template-columns:1fr 1fr;
       }
 
       .row-btn{
@@ -560,6 +630,13 @@
 
       table{
         table-layout:auto;
+      }
+    }
+
+    @media (max-width:560px){
+      .compact-controls,
+      .warmup-controls{
+        grid-template-columns:1fr;
       }
     }
   </style>
@@ -588,19 +665,26 @@
 
         <div class="planner-layout">
           <div>
+            <div class="summary-card today-card">
+              <div class="summary-label">Today’s Workout</div>
+              <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
+              <div class="summary-note" id="templateNote">Standard novice progression template.</div>
+            </div>
+
             <div class="box" style="margin-bottom:14px;">
               <div class="box-title">Session Builder</div>
               <div class="box-body">
                 <div class="box-pad">
-                  <div class="controls-grid">
-                    <div>
+                  <div class="compact-controls">
+                    <div class="mini-control">
                       <label class="control-label" for="unitSelect">Units</label>
                       <select id="unitSelect" class="select">
                         <option value="kg">kg</option>
                         <option value="lb">lb</option>
                       </select>
                     </div>
-                    <div>
+
+                    <div class="mini-control">
                       <label class="control-label" for="phaseSelect">Workout Type</label>
                       <select id="phaseSelect" class="select">
                         <option value="Phase 1">Phase 1</option>
@@ -608,51 +692,46 @@
                         <option value="Phase 3">Phase 3</option>
                       </select>
                     </div>
-                    <div>
+
+                    <div class="mini-control">
                       <label class="control-label" for="daySelect">Day</label>
                       <select id="daySelect" class="select">
                         <option value="Day A">Day A</option>
                         <option value="Day B">Day B</option>
                       </select>
                     </div>
-                  </div>
 
-                  <div class="secondary-controls">
-                    <div>
+                    <div class="mini-control">
                       <label class="control-label" for="bodyweightInput">Bodyweight</label>
                       <input id="bodyweightInput" class="field" type="number" step="0.1" placeholder="Optional">
                     </div>
 
-                    <div>
+                    <div class="mini-control">
                       <label class="control-label">Sex</label>
-                      <div class="sex-toggle">
-                        <label class="check-pill">
-                          <input type="checkbox" id="maleCheckbox">
-                          <span>Male</span>
-                        </label>
-                      </div>
+                      <label class="check-pill compact">
+                        <input type="checkbox" id="maleCheckbox">
+                        <span>Male</span>
+                      </label>
                     </div>
 
-                    <div>
+                    <div class="mini-control">
                       <label class="control-label">&nbsp;</label>
-                      <div class="sex-toggle">
-                        <label class="check-pill">
-                          <input type="checkbox" id="femaleCheckbox">
-                          <span>Female</span>
-                        </label>
-                      </div>
+                      <label class="check-pill compact">
+                        <input type="checkbox" id="femaleCheckbox">
+                        <span>Female</span>
+                      </label>
                     </div>
                   </div>
                 </div>
 
                 <table>
                   <colgroup>
-                    <col style="width:40%">
-                    <col style="width:11%">
-                    <col style="width:11%">
-                    <col style="width:16%">
+                    <col style="width:42%">
                     <col style="width:10%">
-                    <col style="width:12%">
+                    <col style="width:10%">
+                    <col style="width:16%">
+                    <col style="width:8%">
+                    <col style="width:14%">
                   </colgroup>
                   <thead>
                     <tr>
@@ -693,12 +772,6 @@
 
           <div class="summary-side">
             <div class="summary-card">
-              <div class="summary-label">Selected Session</div>
-              <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
-              <div class="summary-note" id="templateNote">Standard novice progression template.</div>
-            </div>
-
-            <div class="summary-card">
               <div class="summary-label">Exercises</div>
               <div class="summary-value" id="exerciseCount">0</div>
               <div class="summary-note" id="exerciseBreakdown">0 planned movements.</div>
@@ -708,6 +781,12 @@
               <div class="summary-label">Session Status</div>
               <div class="summary-value" id="sessionStatus">Planned</div>
               <div class="summary-note" id="sessionStatusNote">No lifts marked complete yet.</div>
+            </div>
+
+            <div class="summary-card">
+              <div class="summary-label">Current Template</div>
+              <div class="summary-value" id="sexSummary">Male</div>
+              <div class="summary-note" id="sexSummaryNote">3 × 5 main lifts.</div>
             </div>
           </div>
         </div>
@@ -726,7 +805,7 @@
             <div class="box-title">Calculator</div>
             <div class="box-body">
               <div class="box-pad">
-                <div class="controls-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                <div class="warmup-controls">
                   <div>
                     <label class="control-label" for="squatWorkWeight">Squat Work Weight</label>
                     <input id="squatWorkWeight" class="field" type="number" step="0.1" placeholder="e.g. 100" />
@@ -773,7 +852,7 @@
 
                 <div class="summary-label">Female option</div>
                 <div class="summary-note" style="font-size:14px;line-height:1.5;">
-                  Female templates change the main work sets to 5 × 3 and replace power clean with RDL.
+                  Female templates use 5 × 3 on the main lifts, replace power clean with RDL, and use deadlift for 2 × 3.
                 </div>
               </div>
             </div>
@@ -831,7 +910,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "starting-strength-tracker-v3";
+    const STORAGE_KEY = "starting-strength-tracker-v4";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -918,7 +997,7 @@
           "Day A": [
             buildExercise("Squat", mainSets, mainReps),
             buildExercise("Bench Press", mainSets, mainReps),
-            buildExercise("Deadlift", 1, 5)
+            buildExercise("Deadlift", female ? 2 : 1, female ? 3 : 5)
           ],
           "Day B": [
             buildExercise("Squat", mainSets, mainReps),
@@ -930,7 +1009,7 @@
           "Day A": [
             buildExercise("Squat", mainSets, mainReps),
             buildExercise("Bench Press", mainSets, mainReps),
-            buildExercise("Deadlift", 1, 5)
+            buildExercise("Deadlift", female ? 2 : 1, female ? 3 : 5)
           ],
           "Day B": [
             buildExercise("Light Squat (80%)", mainSets, mainReps),
@@ -942,7 +1021,7 @@
           "Day A": [
             buildExercise("Squat", mainSets, mainReps),
             buildExercise("Bench Press", mainSets, mainReps),
-            buildExercise("Deadlift", 1, 5)
+            buildExercise("Deadlift", female ? 2 : 1, female ? 3 : 5)
           ],
           "Day B": [
             buildExercise("Front Squat", mainSets, mainReps),
@@ -1082,7 +1161,7 @@
           <td><input type="number" data-index="${index}" data-field="sets" value="${row.sets}"></td>
           <td><input type="number" data-index="${index}" data-field="reps" value="${row.reps}"></td>
           <td><input type="number" step="0.1" data-index="${index}" data-field="weight" value="${row.weight === '' ? '' : row.weight}"></td>
-          <td class="checkbox-wrap"><input type="checkbox" data-index="${index}" data-field="completed" ${row.completed ? "checked" : ""}></td>
+          <td class="checkbox-wrap"><input class="exercise-check" type="checkbox" data-index="${index}" data-field="completed" ${row.completed ? "checked" : ""}></td>
           <td class="actions"><button class="row-btn" type="button" data-delete-index="${index}">Delete</button></td>
         </tr>
       `).join("");
@@ -1127,18 +1206,18 @@
       const metrics = sessionMetrics(session);
       const exercises = session.exercises;
       const unit = state.unit;
+      const isFemale = session.sex === "female";
 
       document.getElementById("selectedSession").textContent = session.phase + " / " + session.day;
-      document.getElementById("exerciseCount").textContent = exercises.length;
-      document.getElementById("exerciseBreakdown").textContent = exercises.map(x => x.exercise).filter(Boolean).join(", ") || "0 planned movements.";
 
       let templateNote = "Standard novice progression template.";
-      if (session.sex === "female") templateNote = "Female template uses 5 × 3 for main lifts and RDL instead of power clean.";
-      if (session.phase === "Phase 2" && session.day === "Day B" && session.sex === "male") templateNote = "Includes light squat at 80% on Day B.";
-      if (session.phase === "Phase 3" && session.day === "Day B" && session.sex === "male") templateNote = "Includes front squat and power clean / chins on Day B.";
-      if (session.phase === "Phase 2" && session.day === "Day B" && session.sex === "female") templateNote = "Includes light squat at 80%, 5 × 3 main work, and RDL.";
-      if (session.phase === "Phase 3" && session.day === "Day B" && session.sex === "female") templateNote = "Includes front squat, 5 × 3 main work, and RDL.";
+      if (session.phase === "Phase 2" && session.day === "Day B" && !isFemale) templateNote = "Includes light squat at 80% on Day B.";
+      if (session.phase === "Phase 3" && session.day === "Day B" && !isFemale) templateNote = "Includes front squat and power clean / chins on Day B.";
+      if (isFemale) templateNote = "Female template uses 5 × 3 main lifts, deadlift 2 × 3, and RDL instead of power clean.";
       document.getElementById("templateNote").textContent = templateNote;
+
+      document.getElementById("exerciseCount").textContent = exercises.length;
+      document.getElementById("exerciseBreakdown").textContent = exercises.map(x => x.exercise).filter(Boolean).join(", ") || "0 planned movements.";
 
       let status = "Planned";
       let statusNote = "No lifts marked complete yet.";
@@ -1153,6 +1232,9 @@
 
       document.getElementById("sessionStatus").textContent = status;
       document.getElementById("sessionStatusNote").textContent = statusNote;
+
+      document.getElementById("sexSummary").textContent = isFemale ? "Female" : "Male";
+      document.getElementById("sexSummaryNote").textContent = isFemale ? "5 × 3 main lifts. Deadlift 2 × 3." : "3 × 5 main lifts.";
 
       document.getElementById("totalSets").textContent = metrics.totalSets;
       document.getElementById("totalReps").textContent = metrics.totalReps;
@@ -1418,6 +1500,7 @@
     document.addEventListener("input", (e) => {
       const t = e.target;
       if (!t.matches("#exerciseTable input")) return;
+      if (t.type === "checkbox") return;
 
       const index = Number(t.dataset.index);
       const field = t.dataset.field;
