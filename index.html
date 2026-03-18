@@ -148,7 +148,7 @@
 
     .planner-layout{
       display:grid;
-      grid-template-columns:1fr 320px;
+      grid-template-columns:1fr;
       gap:16px;
       margin-bottom:16px;
       align-items:start;
@@ -160,11 +160,6 @@
       gap:16px;
       margin-bottom:16px;
       align-items:start;
-    }
-
-    .summary-side{
-      display:grid;
-      gap:12px;
     }
 
     .box{
@@ -195,7 +190,7 @@
 
     .today-grid{
       display:grid;
-      grid-template-columns:1.2fr .9fr .9fr;
+      grid-template-columns:1.3fr .85fr .85fr;
       gap:16px;
       align-items:start;
     }
@@ -218,7 +213,7 @@
 
     .warmup-controls{
       display:grid;
-      grid-template-columns:1fr 1fr;
+      grid-template-columns:1fr;
       gap:12px;
     }
 
@@ -564,22 +559,7 @@
       }
     }
 
-    @media (max-width:1020px){
-      .planner-layout,
-      .two-col{
-        grid-template-columns:1fr;
-      }
-
-      .summary-side{
-        grid-template-columns:1fr 1fr;
-      }
-    }
-
     @media (max-width:760px){
-      .summary-side{
-        grid-template-columns:1fr;
-      }
-
       .page-title{
         font-size:24px;
       }
@@ -593,7 +573,8 @@
       }
 
       .builder-grid,
-      .warmup-controls{
+      .warmup-controls,
+      .two-col{
         grid-template-columns:1fr 1fr;
       }
 
@@ -609,7 +590,8 @@
 
     @media (max-width:560px){
       .builder-grid,
-      .warmup-controls{
+      .warmup-controls,
+      .two-col{
         grid-template-columns:1fr;
       }
     }
@@ -749,26 +731,6 @@
               </div>
             </div>
           </div>
-
-          <div class="summary-side">
-            <div class="summary-card">
-              <div class="summary-label">Exercises</div>
-              <div class="summary-value" id="exerciseCount">0</div>
-              <div class="summary-note" id="exerciseBreakdown">0 planned movements.</div>
-            </div>
-
-            <div class="summary-card">
-              <div class="summary-label">Volume Unit</div>
-              <div class="summary-value" id="volumeUnitCard">kg</div>
-              <div class="summary-note">Used for weights, warm-ups, and volume.</div>
-            </div>
-
-            <div class="summary-card">
-              <div class="summary-label">Tracking</div>
-              <div class="summary-value" id="trackingCard">Per Lift</div>
-              <div class="summary-note">Tick each completed exercise once.</div>
-            </div>
-          </div>
         </div>
 
         <div class="cashflow-row">
@@ -787,8 +749,9 @@
               <div class="box-pad">
                 <div class="warmup-controls">
                   <div>
-                    <label class="control-label" for="squatWorkWeight">Squat Work Weight</label>
-                    <input id="squatWorkWeight" class="field" type="number" step="0.1" placeholder="e.g. 100" />
+                    <div class="summary-label">Squat Work Weight</div>
+                    <div class="summary-value" id="warmupSourceWeight">—</div>
+                    <div class="summary-note" id="warmupSourceNote">Pulled automatically from your squat row.</div>
                   </div>
                   <div>
                     <label class="control-label" for="barWeightInput">Bar Weight</label>
@@ -817,7 +780,7 @@
               <div class="box-pad">
                 <div class="summary-label">How it works</div>
                 <div class="summary-note" style="font-size:14px;line-height:1.5;">
-                  Empty bar, then approximately 40%, 60%, 80%, and 90% of your work-set squat.
+                  The warm-up calculator now uses the weight entered in your squat row automatically.
                   Weights round to the nearest <span id="roundingLabel">2.5 kg</span>.
                 </div>
 
@@ -890,7 +853,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "starting-strength-tracker-v5";
+    const STORAGE_KEY = "starting-strength-tracker-v6";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -1022,7 +985,6 @@
         unit: "kg",
         sex: "male",
         barWeight: 20,
-        squatWorkWeight: "",
         sessions: {
           [today]: {
             phase: "Phase 1",
@@ -1073,7 +1035,6 @@
         state.unit = parsed.unit || "kg";
         state.sex = parsed.sex || "male";
         state.barWeight = parsed.barWeight === undefined ? (state.unit === "kg" ? 20 : 45) : parsed.barWeight;
-        state.squatWorkWeight = parsed.squatWorkWeight === undefined ? "" : parsed.squatWorkWeight;
         state.history = Array.isArray(parsed.history) ? parsed.history : [];
         state.sessions = parsed.sessions && typeof parsed.sessions === "object" ? parsed.sessions : state.sessions;
 
@@ -1147,6 +1108,15 @@
       `).join("");
     }
 
+    function getPrimarySquatExercise(session) {
+      const priority = ["Squat", "Light Squat (80%)", "Front Squat"];
+      for (const name of priority) {
+        const found = session.exercises.find(x => String(x.exercise).trim().toLowerCase() === name.toLowerCase());
+        if (found) return found;
+      }
+      return session.exercises.find(x => String(x.exercise).toLowerCase().includes("squat")) || null;
+    }
+
     function sessionMetrics(session) {
       const exercises = session.exercises || [];
       const totalSets = exercises.reduce((sum, r) => sum + safeNumber(r.sets), 0);
@@ -1213,16 +1183,13 @@
       document.getElementById("sexSummary").textContent = isFemale ? "Female" : "Male";
       document.getElementById("sexSummaryNote").textContent = isFemale ? "5 × 3 main lifts. Deadlift 2 × 3." : "3 × 5 main lifts.";
 
-      document.getElementById("exerciseCount").textContent = exercises.length;
-      document.getElementById("exerciseBreakdown").textContent = exercises.map(x => x.exercise).filter(Boolean).join(", ") || "0 planned movements.";
-      document.getElementById("volumeUnitCard").textContent = unit;
       document.getElementById("totalSets").textContent = metrics.totalSets;
       document.getElementById("totalReps").textContent = metrics.totalReps;
       document.getElementById("totalWeight").textContent = exercises.some(r => r.weight !== "") ? unit : "—";
       document.getElementById("completionRate").textContent = metrics.completionRate + "%";
       document.getElementById("sessionVolumeHero").textContent = fmtWeight(metrics.volume, unit);
 
-      const squat = exercises.find(x => x.exercise.toLowerCase().includes("squat"));
+      const squat = getPrimarySquatExercise(session);
       const bench = exercises.find(x => x.exercise.toLowerCase().includes("bench"));
       const press = exercises.find(x => x.exercise.toLowerCase() === "press");
       const deadlift = exercises.find(x => x.exercise.toLowerCase().includes("deadlift"));
@@ -1245,7 +1212,6 @@
       document.getElementById("notesInput").value = session.notes;
       document.getElementById("unitSelect").value = state.unit;
       document.getElementById("barWeightInput").value = state.barWeight;
-      document.getElementById("squatWorkWeight").value = state.squatWorkWeight;
       renderExerciseTable();
       renderSummary();
       renderWarmup();
@@ -1253,16 +1219,18 @@
 
     function warmupRows() {
       const unit = state.unit;
-      const work = safeNumber(state.squatWorkWeight);
+      const session = currentSession();
+      const squatRow = getPrimarySquatExercise(session);
+      const work = squatRow ? safeNumber(squatRow.weight) : 0;
       const bar = safeNumber(state.barWeight || (unit === "kg" ? 20 : 45));
       const inc = unit === "kg" ? 2.5 : 5;
 
       return [
         { label: "Set 1", pct: "Bar", reps: "2 × 5", weight: bar },
-        { label: "Set 2", pct: "40%", reps: "1 × 5", weight: Math.max(bar, roundToIncrement(work * 0.40, inc)) },
-        { label: "Set 3", pct: "60%", reps: "1 × 3", weight: Math.max(bar, roundToIncrement(work * 0.60, inc)) },
-        { label: "Set 4", pct: "80%", reps: "1 × 2", weight: Math.max(bar, roundToIncrement(work * 0.80, inc)) },
-        { label: "Set 5", pct: "90%", reps: "1 × 1", weight: Math.max(bar, roundToIncrement(work * 0.90, inc)) }
+        { label: "Set 2", pct: "40%", reps: "1 × 5", weight: work > 0 ? Math.max(bar, roundToIncrement(work * 0.40, inc)) : bar },
+        { label: "Set 3", pct: "60%", reps: "1 × 3", weight: work > 0 ? Math.max(bar, roundToIncrement(work * 0.60, inc)) : bar },
+        { label: "Set 4", pct: "80%", reps: "1 × 2", weight: work > 0 ? Math.max(bar, roundToIncrement(work * 0.80, inc)) : bar },
+        { label: "Set 5", pct: "90%", reps: "1 × 1", weight: work > 0 ? Math.max(bar, roundToIncrement(work * 0.90, inc)) : bar }
       ];
     }
 
@@ -1271,8 +1239,13 @@
       const rows = warmupRows();
       const unit = state.unit;
       const inc = unit === "kg" ? "2.5 kg" : "5 lb";
+      const squatRow = getPrimarySquatExercise(currentSession());
 
       document.getElementById("roundingLabel").textContent = inc;
+      document.getElementById("warmupSourceWeight").textContent = squatRow && squatRow.weight !== "" ? fmtWeight(squatRow.weight, unit) : "—";
+      document.getElementById("warmupSourceNote").textContent = squatRow
+        ? `Using ${squatRow.exercise} weight from your session table.`
+        : "Add a squat weight in the session table to generate warm-ups.";
 
       tbody.innerHTML = rows.map(row => `
         <tr>
@@ -1450,12 +1423,6 @@
       renderWarmup();
     });
 
-    document.getElementById("squatWorkWeight").addEventListener("input", (e) => {
-      state.squatWorkWeight = e.target.value === "" ? "" : safeNumber(e.target.value);
-      saveState();
-      renderWarmup();
-    });
-
     document.getElementById("addExercise").addEventListener("click", () => {
       currentSession().exercises.push(blankExercise());
       saveState();
@@ -1479,6 +1446,7 @@
 
       saveState();
       renderSummary();
+      renderWarmup();
     });
 
     document.addEventListener("change", (e) => {
