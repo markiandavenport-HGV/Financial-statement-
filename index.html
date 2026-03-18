@@ -423,34 +423,52 @@
       transform:rotate(45deg);
     }
 
-    .history-exercises{
-      line-height:1.45;
-      white-space:normal;
+    .warmup-table th,
+    .warmup-table td{
+      padding:16px 14px;
     }
 
-    .history-exercise-line{
+    .warmup-table th:first-child,
+    .warmup-table td:first-child{
+      padding-left:18px;
+    }
+
+    .warmup-table th:last-child,
+    .warmup-table td:last-child{
+      padding-right:18px;
+    }
+
+    .history-lifts{
+      line-height:1.55;
+      white-space:normal;
+      padding-top:10px;
+      padding-bottom:10px;
+    }
+
+    .history-lift-line{
       display:flex;
       justify-content:space-between;
       gap:12px;
       border-bottom:1px solid #f0f0f2;
-      padding:4px 0;
+      padding:6px 0;
     }
 
-    .history-exercise-line:last-child{
+    .history-lift-line:last-child{
       border-bottom:0;
     }
 
-    .history-exercise-name{
+    .history-lift-name{
       color:var(--text);
       font-weight:600;
       min-width:0;
       flex:1;
     }
 
-    .history-exercise-weight{
+    .history-lift-detail{
       color:var(--muted);
       white-space:nowrap;
       font-variant-numeric:tabular-nums;
+      text-align:right;
     }
 
     .footer-summary{
@@ -484,6 +502,12 @@
       font-weight:700;
       letter-spacing:-0.03em;
       font-variant-numeric:tabular-nums;
+    }
+
+    .autosave-note{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:6px;
     }
 
     .hidden{display:none !important}
@@ -529,6 +553,11 @@
       table{
         table-layout:auto;
       }
+
+      .warmup-table th,
+      .warmup-table td{
+        padding:14px 12px;
+      }
     }
 
     @media (max-width:560px){
@@ -551,7 +580,6 @@
         </div>
 
         <button class="btn primary" id="toggleViewBtn" type="button">History View</button>
-        <button class="btn" id="saveSessionBtn" type="button">Save Session</button>
         <button class="btn" id="exportBtn" type="button">Export CSV</button>
       </div>
     </div>
@@ -566,6 +594,7 @@
               <div class="summary-label">Today’s Workout</div>
               <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
               <div class="summary-note" id="templateNote">Standard novice progression template.</div>
+              <div class="autosave-note">Changes save automatically as you enter them.</div>
             </div>
             <div class="today-sub">
               <div class="summary-label">Current Template</div>
@@ -684,7 +713,7 @@
                 </div>
               </div>
 
-              <table>
+              <table class="warmup-table">
                 <thead>
                   <tr>
                     <th>Set</th>
@@ -751,21 +780,13 @@
           <div class="box-body">
             <table>
               <colgroup>
-                <col style="width:15%">
-                <col style="width:10%">
-                <col style="width:9%">
-                <col style="width:40%">
-                <col style="width:12%">
-                <col style="width:14%">
+                <col style="width:20%">
+                <col style="width:80%">
               </colgroup>
               <thead>
                 <tr>
                   <th>Date</th>
-                  <th>Phase</th>
-                  <th>Day</th>
                   <th>Lifts</th>
-                  <th>Completion</th>
-                  <th>Template</th>
                 </tr>
               </thead>
               <tbody id="historyTable"></tbody>
@@ -777,7 +798,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "starting-strength-tracker-v7";
+    const STORAGE_KEY = "starting-strength-tracker-v8";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -1016,6 +1037,31 @@
       };
     }
 
+    function upsertHistoryFromCurrentSession() {
+      const session = currentSession();
+      const metrics = sessionMetrics(session);
+
+      const payload = {
+        id: "auto_" + state.selectedDate,
+        date: state.selectedDate,
+        sex: session.sex,
+        bodyweight: session.bodyweight,
+        notes: session.notes,
+        unit: state.unit,
+        completionRate: metrics.completionRate,
+        exercises: JSON.parse(JSON.stringify(session.exercises))
+      };
+
+      state.history = state.history.filter(item => item.date !== payload.date);
+      state.history.push(payload);
+    }
+
+    function persistAndRefresh(options = {}) {
+      upsertHistoryFromCurrentSession();
+      saveState();
+      if (options.render !== false) render();
+    }
+
     function nextJump(weight, type) {
       const unit = state.unit;
       const w = safeNumber(weight);
@@ -1164,7 +1210,7 @@
     function renderHistory() {
       const tbody = document.getElementById("historyTable");
       if (!state.history.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty">No saved sessions yet.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="2" class="empty">No saved sessions yet.</td></tr>';
         return;
       }
 
@@ -1172,20 +1218,16 @@
 
       tbody.innerHTML = sorted.map(item => {
         const exerciseLines = (item.exercises || []).map(ex => `
-          <div class="history-exercise-line">
-            <span class="history-exercise-name">${escapeHtml(ex.exercise)}</span>
-            <span class="history-exercise-weight">${ex.weight === "" ? "—" : fmtWeight(ex.weight, item.unit)}</span>
+          <div class="history-lift-line">
+            <span class="history-lift-name">${escapeHtml(ex.exercise)}</span>
+            <span class="history-lift-detail">${ex.weight === "" ? "—" : fmtWeight(ex.weight, item.unit)} · ${safeNumber(ex.sets)} × ${safeNumber(ex.reps)}</span>
           </div>
         `).join("");
 
         return `
           <tr>
             <td>${displayDate(item.date)}</td>
-            <td>${escapeHtml(item.phase)}</td>
-            <td>${escapeHtml(item.day)}</td>
-            <td class="history-exercises">${exerciseLines}</td>
-            <td class="readonly-cell">${item.completionRate}%</td>
-            <td class="readonly-cell">${item.sex === "female" ? "Female" : "Male"}</td>
+            <td class="history-lifts">${exerciseLines}</td>
           </tr>
         `;
       }).join("");
@@ -1208,8 +1250,7 @@
       session.sex = sex;
       state.sex = sex;
       session.exercises = templateFor(phase, day, sex);
-      saveState();
-      render();
+      persistAndRefresh();
     }
 
     function shiftSelectedDate(days) {
@@ -1217,32 +1258,7 @@
       d.setDate(d.getDate() + days);
       state.selectedDate = isoDate(d);
       ensureSessionExists(state.selectedDate);
-      saveState();
-      render();
-    }
-
-    function saveCurrentSessionToHistory() {
-      const session = currentSession();
-      const metrics = sessionMetrics(session);
-
-      const payload = {
-        id: uid("hist"),
-        date: state.selectedDate,
-        phase: session.phase,
-        day: session.day,
-        sex: session.sex,
-        bodyweight: session.bodyweight,
-        notes: session.notes,
-        unit: state.unit,
-        completionRate: metrics.completionRate,
-        exercises: JSON.parse(JSON.stringify(session.exercises))
-      };
-
-      state.history = state.history.filter(item => !(item.date === payload.date && item.phase === payload.phase && item.day === payload.day));
-      state.history.push(payload);
-      saveState();
-      if (state.viewMode === "history") renderHistory();
-      alert("Session saved.");
+      persistAndRefresh();
     }
 
     function exportCsv() {
@@ -1276,6 +1292,8 @@
     }
 
     const state = loadState();
+    upsertHistoryFromCurrentSession();
+    saveState();
 
     document.getElementById("prevDay").addEventListener("click", () => shiftSelectedDate(-1));
     document.getElementById("nextDay").addEventListener("click", () => shiftSelectedDate(1));
@@ -1286,7 +1304,6 @@
       render();
     });
 
-    document.getElementById("saveSessionBtn").addEventListener("click", saveCurrentSessionToHistory);
     document.getElementById("exportBtn").addEventListener("click", exportCsv);
 
     document.getElementById("phaseSelect").addEventListener("change", (e) => {
@@ -1306,30 +1323,27 @@
       if (!state.barWeight) state.barWeight = state.unit === "kg" ? 20 : 45;
       if (state.barWeight === 20 && state.unit === "lb") state.barWeight = 45;
       if (state.barWeight === 45 && state.unit === "kg") state.barWeight = 20;
-      saveState();
-      render();
+      persistAndRefresh();
     });
 
     document.getElementById("bodyweightInput").addEventListener("input", (e) => {
       currentSession().bodyweight = e.target.value;
-      saveState();
+      persistAndRefresh({render:false});
     });
 
     document.getElementById("notesInput").addEventListener("input", (e) => {
       currentSession().notes = e.target.value;
-      saveState();
+      persistAndRefresh({render:false});
     });
 
     document.getElementById("barWeightInput").addEventListener("input", (e) => {
       state.barWeight = e.target.value === "" ? "" : safeNumber(e.target.value);
-      saveState();
-      renderWarmup();
+      persistAndRefresh();
     });
 
     document.getElementById("addExercise").addEventListener("click", () => {
       currentSession().exercises.push(blankExercise());
-      saveState();
-      render();
+      persistAndRefresh();
     });
 
     document.addEventListener("input", (e) => {
@@ -1347,9 +1361,7 @@
       if (field === "reps") row.reps = Math.max(0, safeNumber(t.value));
       if (field === "weight") row.weight = t.value === "" ? "" : safeNumber(t.value);
 
-      saveState();
-      renderSummary();
-      renderWarmup();
+      persistAndRefresh();
     });
 
     document.addEventListener("change", (e) => {
@@ -1361,8 +1373,7 @@
       if (!row) return;
 
       row.completed = t.checked;
-      saveState();
-      renderSummary();
+      persistAndRefresh();
     });
 
     document.addEventListener("click", (e) => {
@@ -1370,8 +1381,7 @@
       if (!btn) return;
       const index = Number(btn.dataset.deleteIndex);
       currentSession().exercises.splice(index, 1);
-      saveState();
-      render();
+      persistAndRefresh();
     });
 
     render();
