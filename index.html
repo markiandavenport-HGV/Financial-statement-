@@ -334,6 +334,11 @@
       min-width:0;
     }
 
+    .picker-input{
+      cursor:pointer;
+      user-select:none;
+    }
+
     .readonly-cell{
       text-align:right;
       white-space:nowrap;
@@ -546,6 +551,133 @@
     .hidden{display:none !important}
     .empty{text-align:center;color:var(--muted);padding:16px 0;font-size:13px}
 
+    .picker-overlay{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.28);
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      z-index:9999;
+      padding:12px;
+    }
+
+    .picker-sheet{
+      width:min(520px,100%);
+      background:rgba(248,248,248,.96);
+      backdrop-filter:blur(20px);
+      border-radius:22px;
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+      overflow:hidden;
+    }
+
+    .picker-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:14px 16px;
+      border-bottom:1px solid #d9d9de;
+      background:rgba(255,255,255,.72);
+    }
+
+    .picker-title{
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:-.01em;
+    }
+
+    .picker-btn{
+      border:0;
+      background:transparent;
+      color:var(--accent);
+      font-size:16px;
+      font-weight:600;
+      padding:6px 8px;
+      cursor:pointer;
+    }
+
+    .picker-body{
+      padding:14px 16px 18px;
+    }
+
+    .picker-display{
+      text-align:center;
+      font-size:32px;
+      font-weight:700;
+      letter-spacing:-.03em;
+      padding:10px 0 14px;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .picker-wheel-wrap{
+      position:relative;
+      height:220px;
+      border-radius:18px;
+      overflow:hidden;
+      background:linear-gradient(180deg,#f4f4f6 0%,#fff 35%,#fff 65%,#f4f4f6 100%);
+      border:1px solid #e2e2e7;
+    }
+
+    .picker-wheel{
+      height:220px;
+      overflow-y:auto;
+      scroll-snap-type:y mandatory;
+      -webkit-overflow-scrolling:touch;
+      padding:88px 0;
+      scrollbar-width:none;
+    }
+
+    .picker-wheel::-webkit-scrollbar{
+      display:none;
+    }
+
+    .picker-row{
+      height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      scroll-snap-align:center;
+      font-size:24px;
+      color:#7a7a80;
+      font-variant-numeric:tabular-nums;
+    }
+
+    .picker-row.active{
+      color:var(--text);
+      font-weight:700;
+    }
+
+    .picker-highlight{
+      position:absolute;
+      left:10px;
+      right:10px;
+      top:88px;
+      height:44px;
+      border-radius:12px;
+      border-top:1px solid #d7d7dc;
+      border-bottom:1px solid #d7d7dc;
+      background:rgba(255,255,255,.72);
+      pointer-events:none;
+    }
+
+    .picker-quick{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:center;
+      margin-top:14px;
+    }
+
+    .picker-chip{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:13px;
+      cursor:pointer;
+      font-family:inherit;
+    }
+
     @media (max-width:1100px){
       .builder-top-grid,
       .builder-grid{
@@ -593,6 +725,14 @@
       .warmup-table td{
         padding:14px 12px;
       }
+
+      .picker-display{
+        font-size:28px;
+      }
+
+      .picker-row{
+        font-size:22px;
+      }
     }
 
     @media (max-width:560px){
@@ -630,7 +770,6 @@
               <div class="summary-label">Today’s Workout</div>
               <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
               <div class="summary-note" id="templateNote">Standard novice progression template.</div>
-
               <div class="today-lifts" id="todayLiftsList"></div>
             </div>
 
@@ -684,7 +823,7 @@
 
                 <div>
                   <label class="control-label" for="bodyweightInput">Bodyweight</label>
-                  <input id="bodyweightInput" class="field" type="number" step="0.1" placeholder="Optional">
+                  <input id="bodyweightInput" class="field picker-input" type="text" readonly placeholder="Tap to choose">
                 </div>
               </div>
             </div>
@@ -748,7 +887,7 @@
                   </div>
                   <div>
                     <label class="control-label" for="barWeightInput">Bar Weight</label>
-                    <input id="barWeightInput" class="field" type="number" step="0.1" placeholder="20" />
+                    <input id="barWeightInput" class="field picker-input" type="text" readonly placeholder="Tap to choose">
                   </div>
                 </div>
               </div>
@@ -837,8 +976,32 @@
     </div>
   </div>
 
+  <div id="weightPickerOverlay" class="picker-overlay hidden" aria-hidden="true">
+    <div class="picker-sheet">
+      <div class="picker-head">
+        <button class="picker-btn" id="pickerCancelBtn" type="button">Cancel</button>
+        <div class="picker-title" id="pickerTitle">Choose weight</div>
+        <button class="picker-btn" id="pickerDoneBtn" type="button">Done</button>
+      </div>
+      <div class="picker-body">
+        <div class="picker-display" id="pickerDisplay">0 kg</div>
+        <div class="picker-wheel-wrap">
+          <div class="picker-highlight"></div>
+          <div class="picker-wheel" id="pickerWheel"></div>
+        </div>
+        <div class="picker-quick">
+          <button class="picker-chip" type="button" data-picker-jump="-10">-10</button>
+          <button class="picker-chip" type="button" data-picker-jump="-2.5">-2.5</button>
+          <button class="picker-chip" type="button" data-picker-jump="2.5">+2.5</button>
+          <button class="picker-chip" type="button" data-picker-jump="10">+10</button>
+          <button class="picker-chip" type="button" data-picker-set="0">Set 0</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const STORAGE_KEY = "starting-strength-tracker-v9";
+    const STORAGE_KEY = "starting-strength-tracker-v11";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -984,6 +1147,8 @@
       };
     }
 
+    let state;
+
     function ensureSessionExists(dateKey, stateRef = state) {
       if (stateRef.sessions[dateKey]) return;
       stateRef.sessions[dateKey] = {
@@ -1013,23 +1178,21 @@
         if (!raw) return defaultState();
 
         const parsed = JSON.parse(raw);
-        const state = defaultState();
+        const loaded = defaultState();
 
-        state.selectedDate = parsed.selectedDate || state.selectedDate;
-        state.viewMode = parsed.viewMode || "session";
-        state.unit = parsed.unit || "kg";
-        state.sex = parsed.sex || "male";
-        state.barWeight = parsed.barWeight === undefined ? (state.unit === "kg" ? 20 : 45) : parsed.barWeight;
-        state.history = Array.isArray(parsed.history) ? parsed.history : [];
-        state.sessions = parsed.sessions && typeof parsed.sessions === "object" ? parsed.sessions : state.sessions;
+        loaded.selectedDate = parsed.selectedDate || loaded.selectedDate;
+        loaded.viewMode = parsed.viewMode || "session";
+        loaded.unit = parsed.unit || "kg";
+        loaded.sex = parsed.sex || "male";
+        loaded.barWeight = parsed.barWeight === undefined ? (loaded.unit === "kg" ? 20 : 45) : parsed.barWeight;
+        loaded.history = Array.isArray(parsed.history) ? parsed.history : [];
+        loaded.sessions = parsed.sessions && typeof parsed.sessions === "object" ? parsed.sessions : loaded.sessions;
 
-        ensureSessionExists(state.selectedDate, state);
-
-        Object.keys(state.sessions).forEach(dateKey => {
-          const s = state.sessions[dateKey];
+        Object.keys(loaded.sessions).forEach(dateKey => {
+          const s = loaded.sessions[dateKey];
           s.phase = s.phase || "Phase 1";
           s.day = s.day || "Day A";
-          s.sex = s.sex || state.sex || "male";
+          s.sex = s.sex || loaded.sex || "male";
           s.bodyweight = s.bodyweight === undefined ? "" : s.bodyweight;
           s.notes = s.notes || "";
           s.exercises = Array.isArray(s.exercises) && s.exercises.length
@@ -1037,7 +1200,7 @@
             : templateFor(s.phase, s.day, s.sex);
         });
 
-        return state;
+        return loaded;
       } catch (e) {
         return defaultState();
       }
@@ -1149,7 +1312,7 @@
           <td><input type="text" data-index="${index}" data-field="exercise" value="${escapeHtml(row.exercise)}"></td>
           <td><input type="number" data-index="${index}" data-field="sets" value="${row.sets}"></td>
           <td><input type="number" data-index="${index}" data-field="reps" value="${row.reps}"></td>
-          <td><input type="number" step="0.1" data-index="${index}" data-field="weight" value="${row.weight === '' ? '' : row.weight}"></td>
+          <td><input class="picker-input" type="text" readonly data-index="${index}" data-field="weight" value="${row.weight === '' ? '' : fmtNumber(row.weight)}" placeholder="Tap"></td>
           <td class="checkbox-wrap"><div class="checkbox-cell"><input class="exercise-check" type="checkbox" data-index="${index}" data-field="completed" ${row.completed ? "checked" : ""}></div></td>
           <td class="actions"><button class="row-btn" type="button" data-delete-index="${index}">Delete</button></td>
         </tr>
@@ -1257,10 +1420,10 @@
       document.getElementById("phaseSelect").value = session.phase;
       document.getElementById("daySelect").value = session.day;
       document.getElementById("sexSelect").value = session.sex;
-      document.getElementById("bodyweightInput").value = session.bodyweight;
-      document.getElementById("notesInput").value = session.notes;
+      document.getElementById("bodyweightInput").value = session.bodyweight === "" ? "" : fmtNumber(session.bodyweight);
       document.getElementById("unitSelect").value = state.unit;
-      document.getElementById("barWeightInput").value = state.barWeight;
+      document.getElementById("barWeightInput").value = fmtNumber(state.barWeight);
+      document.getElementById("notesInput").value = session.notes;
       renderExerciseTable();
       renderSummary();
       renderWarmup();
@@ -1350,7 +1513,134 @@
       URL.revokeObjectURL(url);
     }
 
-    const state = loadState();
+    const picker = {
+      target: null,
+      value: 0,
+      min: 0,
+      max: 500,
+      step: 1,
+      title: "Choose value"
+    };
+
+    function getPickerStep() {
+      return state.unit === "kg" ? 2.5 : 5;
+    }
+
+    function pickerDisplayValue(v) {
+      return fmtWeight(v, state.unit);
+    }
+
+    function buildPickerWheel(centerValue) {
+      const wheel = document.getElementById("pickerWheel");
+      const step = picker.step;
+      const start = Math.max(picker.min, centerValue - (step * 40));
+      const end = Math.min(picker.max, centerValue + (step * 40));
+
+      let html = "";
+      for (let v = start; v <= end + 0.0001; v += step) {
+        const rounded = Number(v.toFixed(2));
+        const active = Math.abs(rounded - centerValue) < 0.001;
+        html += `<div class="picker-row${active ? " active" : ""}" data-picker-value="${rounded}">${pickerDisplayValue(rounded)}</div>`;
+      }
+      wheel.innerHTML = html;
+
+      requestAnimationFrame(() => {
+        const targetRow = wheel.querySelector(`[data-picker-value="${centerValue}"]`);
+        if (targetRow) {
+          wheel.scrollTop = targetRow.offsetTop - 88;
+          updatePickerActive();
+        }
+      });
+    }
+
+    function updatePickerActive() {
+      const wheel = document.getElementById("pickerWheel");
+      const rows = Array.from(wheel.querySelectorAll(".picker-row"));
+      if (!rows.length) return;
+
+      const center = wheel.scrollTop + (wheel.clientHeight / 2);
+      let best = rows[0];
+      let bestDist = Infinity;
+
+      rows.forEach(row => {
+        const rowCenter = row.offsetTop + (row.offsetHeight / 2);
+        const dist = Math.abs(center - rowCenter);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = row;
+        }
+      });
+
+      rows.forEach(r => r.classList.remove("active"));
+      best.classList.add("active");
+
+      picker.value = Number(best.dataset.pickerValue);
+      document.getElementById("pickerDisplay").textContent = pickerDisplayValue(picker.value);
+    }
+
+    function scrollPickerToValue(value) {
+      value = Math.max(picker.min, Math.min(picker.max, Number(value.toFixed(2))));
+      const wheel = document.getElementById("pickerWheel");
+      const currentRows = Array.from(wheel.querySelectorAll(".picker-row"));
+
+      if (!currentRows.length) {
+        buildPickerWheel(value);
+        return;
+      }
+
+      const first = Number(currentRows[0].dataset.pickerValue);
+      const last = Number(currentRows[currentRows.length - 1].dataset.pickerValue);
+
+      if (value < first + picker.step * 5 || value > last - picker.step * 5) {
+        buildPickerWheel(value);
+        return;
+      }
+
+      const row = wheel.querySelector(`[data-picker-value="${value}"]`);
+      if (row) {
+        wheel.scrollTop = row.offsetTop - 88;
+        updatePickerActive();
+      }
+    }
+
+    function openPicker(input) {
+      picker.target = input;
+      picker.step = getPickerStep();
+      picker.min = 0;
+      picker.max = state.unit === "kg" ? 500 : 1000;
+      picker.title = input.dataset.pickerTitle || "Choose value";
+      picker.value = input.value === "" ? 0 : safeNumber(input.value);
+
+      document.getElementById("pickerTitle").textContent = picker.title;
+      document.getElementById("pickerDisplay").textContent = pickerDisplayValue(picker.value);
+      document.getElementById("weightPickerOverlay").classList.remove("hidden");
+      document.getElementById("weightPickerOverlay").setAttribute("aria-hidden", "false");
+      buildPickerWheel(picker.value);
+    }
+
+    function closePicker() {
+      document.getElementById("weightPickerOverlay").classList.add("hidden");
+      document.getElementById("weightPickerOverlay").setAttribute("aria-hidden", "true");
+      picker.target = null;
+    }
+
+    function applyPickerValue() {
+      if (!picker.target) return;
+      picker.target.value = fmtNumber(picker.value);
+      picker.target.dispatchEvent(new Event("input", { bubbles: true }));
+      closePicker();
+    }
+
+    let pickerScrollTimer = null;
+    document.getElementById("pickerWheel").addEventListener("scroll", function(){
+      updatePickerActive();
+      clearTimeout(pickerScrollTimer);
+      pickerScrollTimer = setTimeout(() => {
+        scrollPickerToValue(picker.value);
+      }, 80);
+    });
+
+    state = loadState();
     upsertHistoryFromCurrentSession();
     saveState();
 
@@ -1385,19 +1675,9 @@
       persistAndRefresh();
     });
 
-    document.getElementById("bodyweightInput").addEventListener("input", (e) => {
-      currentSession().bodyweight = e.target.value;
-      persistAndRefresh({render:false});
-    });
-
     document.getElementById("notesInput").addEventListener("input", (e) => {
       currentSession().notes = e.target.value;
       persistAndRefresh({render:false});
-    });
-
-    document.getElementById("barWeightInput").addEventListener("input", (e) => {
-      state.barWeight = e.target.value === "" ? "" : safeNumber(e.target.value);
-      persistAndRefresh();
     });
 
     document.getElementById("addExercise").addEventListener("click", () => {
@@ -1407,6 +1687,19 @@
 
     document.addEventListener("input", (e) => {
       const t = e.target;
+
+      if (t.id === "bodyweightInput") {
+        currentSession().bodyweight = t.value === "" ? "" : safeNumber(t.value);
+        persistAndRefresh({render:false});
+        return;
+      }
+
+      if (t.id === "barWeightInput") {
+        state.barWeight = t.value === "" ? 0 : safeNumber(t.value);
+        persistAndRefresh();
+        return;
+      }
+
       if (!t.matches("#exerciseTable input")) return;
       if (t.type === "checkbox") return;
 
@@ -1420,7 +1713,10 @@
       if (field === "reps") row.reps = Math.max(0, safeNumber(t.value));
       if (field === "weight") row.weight = t.value === "" ? "" : safeNumber(t.value);
 
-      persistAndRefresh();
+      persistAndRefresh(field === "exercise" ? {render:false} : undefined);
+      if (field === "exercise") {
+        renderSummary();
+      }
     });
 
     document.addEventListener("change", (e) => {
@@ -1436,7 +1732,43 @@
     });
 
     document.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-delete-index]");
+      const t = e.target;
+
+      if (t.id === "pickerCancelBtn") {
+        closePicker();
+        return;
+      }
+
+      if (t.id === "pickerDoneBtn") {
+        applyPickerValue();
+        return;
+      }
+
+      if (t.id === "weightPickerOverlay") {
+        closePicker();
+        return;
+      }
+
+      if (t.dataset.pickerJump) {
+        scrollPickerToValue(picker.value + Number(t.dataset.pickerJump));
+        return;
+      }
+
+      if (t.dataset.pickerSet !== undefined) {
+        scrollPickerToValue(Number(t.dataset.pickerSet));
+        return;
+      }
+
+      const pickerInput = t.closest(".picker-input");
+      if (pickerInput) {
+        if (pickerInput.id === "bodyweightInput") pickerInput.dataset.pickerTitle = "Choose bodyweight";
+        if (pickerInput.id === "barWeightInput") pickerInput.dataset.pickerTitle = "Choose bar weight";
+        if (pickerInput.dataset.field === "weight") pickerInput.dataset.pickerTitle = "Choose weight";
+        openPicker(pickerInput);
+        return;
+      }
+
+      const btn = t.closest("[data-delete-index]");
       if (!btn) return;
       const index = Number(btn.dataset.deleteIndex);
       currentSession().exercises.splice(index, 1);
