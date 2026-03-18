@@ -630,6 +630,7 @@
               <div class="summary-label">Today’s Workout</div>
               <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
               <div class="summary-note" id="templateNote">Standard novice progression template.</div>
+
               <div class="today-lifts" id="todayLiftsList"></div>
             </div>
 
@@ -837,7 +838,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "starting-strength-tracker-v10";
+    const STORAGE_KEY = "starting-strength-tracker-v9";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -902,111 +903,58 @@
       return sex === "female";
     }
 
-    function buildExercise(name, sets, reps, weight = "") {
+    function buildExercise(name, sets, reps) {
       return {
         id: uid("ex"),
         exercise: name,
         sets,
         reps,
-        weight,
+        weight: "",
         completed: false
       };
     }
 
-    function getDayForNextWorkout(prevDay) {
-      return prevDay === "Day A" ? "Day B" : "Day A";
-    }
-
-    function getPreviousSessionKey(dateKey) {
-      const keys = Object.keys(state.sessions || {}).filter(k => k < dateKey).sort();
-      return keys.length ? keys[keys.length - 1] : null;
-    }
-
-    function findLatestPreviousExerciseWeight(beforeDateKey, names) {
-      const keys = Object.keys(state.sessions || {}).filter(k => k < beforeDateKey).sort().reverse();
-      for (const key of keys) {
-        const session = state.sessions[key];
-        for (const name of names) {
-          const found = session.exercises.find(ex => String(ex.exercise).trim().toLowerCase() === name.toLowerCase() && ex.weight !== "");
-          if (found) return safeNumber(found.weight);
-        }
-      }
-      return "";
-    }
-
-    function getIncrementForExercise(name, unit) {
-      const lower = String(name).toLowerCase();
-      if (lower.includes("bench") || lower === "press") return unit === "kg" ? 2.5 : 5;
-      if (lower.includes("deadlift") || lower.includes("power clean") || lower.includes("chins") || lower.includes("rdl")) return unit === "kg" ? 5 : 10;
-      return unit === "kg" ? 2.5 : 5;
-    }
-
-    function buildPrefilledTemplate(phase, day, sex, dateKey) {
+    function templateFor(phase, day, sex) {
       const female = isFemaleTemplate(sex);
       const mainSets = female ? 5 : 3;
       const mainReps = female ? 3 : 5;
-      const unit = state.unit;
-      const squatBase = findLatestPreviousExerciseWeight(dateKey, ["Squat", "Light Squat (80%)", "Front Squat"]);
-      const benchBase = findLatestPreviousExerciseWeight(dateKey, ["Bench Press"]);
-      const pressBase = findLatestPreviousExerciseWeight(dateKey, ["Press"]);
-      const deadliftBase = findLatestPreviousExerciseWeight(dateKey, ["Deadlift"]);
-      const cleanBase = findLatestPreviousExerciseWeight(dateKey, ["Power Clean", "Power Clean / Chins"]);
-      const rdlBase = findLatestPreviousExerciseWeight(dateKey, ["RDL"]);
-
-      function progressed(base, exerciseName) {
-        if (base === "") return "";
-        return base + getIncrementForExercise(exerciseName, unit);
-      }
-
-      function lightSquatFromSquat() {
-        if (squatBase === "") return "";
-        const inc = unit === "kg" ? 2.5 : 5;
-        return roundToIncrement(squatBase * 0.8, inc);
-      }
-
-      function frontSquatFromSquat() {
-        if (squatBase === "") return "";
-        const inc = unit === "kg" ? 2.5 : 5;
-        return roundToIncrement(squatBase * 0.8, inc);
-      }
-
       const pullName = female ? "RDL" : "Power Clean";
 
       const templates = {
         "Phase 1": {
           "Day A": [
-            buildExercise("Squat", mainSets, mainReps, progressed(squatBase, "Squat")),
-            buildExercise("Bench Press", mainSets, mainReps, progressed(benchBase, "Bench Press")),
-            buildExercise("Deadlift", female ? 2 : 1, female ? 3 : 5, progressed(deadliftBase, "Deadlift"))
+            buildExercise("Squat", mainSets, mainReps),
+            buildExercise("Bench Press", mainSets, mainReps),
+            buildExercise("Deadlift", female ? 2 : 1, female ? 3 : 5)
           ],
           "Day B": [
-            buildExercise("Squat", mainSets, mainReps, progressed(squatBase, "Squat")),
-            buildExercise("Press", mainSets, mainReps, progressed(pressBase, "Press")),
-            buildExercise(pullName, female ? 3 : 5, female ? 8 : 3, female ? progressed(rdlBase, "RDL") : progressed(cleanBase, "Power Clean"))
+            buildExercise("Squat", mainSets, mainReps),
+            buildExercise("Press", mainSets, mainReps),
+            buildExercise(pullName, female ? 3 : 5, female ? 8 : 3)
           ]
         },
         "Phase 2": {
           "Day A": [
-            buildExercise("Squat", mainSets, mainReps, progressed(squatBase, "Squat")),
-            buildExercise("Bench Press", mainSets, mainReps, progressed(benchBase, "Bench Press")),
-            buildExercise("Deadlift", female ? 2 : 1, female ? 3 : 5, progressed(deadliftBase, "Deadlift"))
+            buildExercise("Squat", mainSets, mainReps),
+            buildExercise("Bench Press", mainSets, mainReps),
+            buildExercise("Deadlift", female ? 2 : 1, female ? 3 : 5)
           ],
           "Day B": [
-            buildExercise("Light Squat (80%)", mainSets, mainReps, lightSquatFromSquat()),
-            buildExercise("Press", mainSets, mainReps, progressed(pressBase, "Press")),
-            buildExercise(pullName, female ? 3 : 5, female ? 8 : 3, female ? progressed(rdlBase, "RDL") : progressed(cleanBase, "Power Clean"))
+            buildExercise("Light Squat (80%)", mainSets, mainReps),
+            buildExercise("Press", mainSets, mainReps),
+            buildExercise(pullName, female ? 3 : 5, female ? 8 : 3)
           ]
         },
         "Phase 3": {
           "Day A": [
-            buildExercise("Squat", mainSets, mainReps, progressed(squatBase, "Squat")),
-            buildExercise("Bench Press", mainSets, mainReps, progressed(benchBase, "Bench Press")),
-            buildExercise("Deadlift", female ? 2 : 1, female ? 3 : 5, progressed(deadliftBase, "Deadlift"))
+            buildExercise("Squat", mainSets, mainReps),
+            buildExercise("Bench Press", mainSets, mainReps),
+            buildExercise("Deadlift", female ? 2 : 1, female ? 3 : 5)
           ],
           "Day B": [
-            buildExercise("Front Squat", mainSets, mainReps, frontSquatFromSquat()),
-            buildExercise("Press", mainSets, mainReps, progressed(pressBase, "Press")),
-            buildExercise(female ? "RDL" : "Power Clean / Chins", female ? 3 : 5, female ? 8 : 3, female ? progressed(rdlBase, "RDL") : progressed(cleanBase, "Power Clean"))
+            buildExercise("Front Squat", mainSets, mainReps),
+            buildExercise("Press", mainSets, mainReps),
+            buildExercise(female ? "RDL" : "Power Clean / Chins", female ? 3 : 5, female ? 8 : 3)
           ]
         }
       };
@@ -1029,40 +977,23 @@
             sex: "male",
             bodyweight: "",
             notes: "",
-            exercises: buildPrefilledTemplate("Phase 1", "Day A", "male", today)
+            exercises: templateFor("Phase 1", "Day A", "male")
           }
         },
         history: []
       };
     }
 
-    let state;
-
     function ensureSessionExists(dateKey, stateRef = state) {
       if (stateRef.sessions[dateKey]) return;
-
-      const prevKey = Object.keys(stateRef.sessions).filter(k => k < dateKey).sort().pop();
-      if (prevKey) {
-        const prev = stateRef.sessions[prevKey];
-        const nextDay = getDayForNextWorkout(prev.day);
-        stateRef.sessions[dateKey] = {
-          phase: prev.phase,
-          day: nextDay,
-          sex: prev.sex,
-          bodyweight: prev.bodyweight || "",
-          notes: "",
-          exercises: buildPrefilledTemplate(prev.phase, nextDay, prev.sex, dateKey)
-        };
-      } else {
-        stateRef.sessions[dateKey] = {
-          phase: "Phase 1",
-          day: "Day A",
-          sex: stateRef.sex || "male",
-          bodyweight: "",
-          notes: "",
-          exercises: buildPrefilledTemplate("Phase 1", "Day A", stateRef.sex || "male", dateKey)
-        };
-      }
+      stateRef.sessions[dateKey] = {
+        phase: "Phase 1",
+        day: "Day A",
+        sex: stateRef.sex || "male",
+        bodyweight: "",
+        notes: "",
+        exercises: templateFor("Phase 1", "Day A", stateRef.sex || "male")
+      };
     }
 
     function normalizeExercise(r) {
@@ -1082,32 +1013,31 @@
         if (!raw) return defaultState();
 
         const parsed = JSON.parse(raw);
-        const loaded = defaultState();
+        const state = defaultState();
 
-        loaded.selectedDate = parsed.selectedDate || loaded.selectedDate;
-        loaded.viewMode = parsed.viewMode || "session";
-        loaded.unit = parsed.unit || "kg";
-        loaded.sex = parsed.sex || "male";
-        loaded.barWeight = parsed.barWeight === undefined ? (loaded.unit === "kg" ? 20 : 45) : parsed.barWeight;
-        loaded.history = Array.isArray(parsed.history) ? parsed.history : [];
-        loaded.sessions = parsed.sessions && typeof parsed.sessions === "object" ? parsed.sessions : loaded.sessions;
+        state.selectedDate = parsed.selectedDate || state.selectedDate;
+        state.viewMode = parsed.viewMode || "session";
+        state.unit = parsed.unit || "kg";
+        state.sex = parsed.sex || "male";
+        state.barWeight = parsed.barWeight === undefined ? (state.unit === "kg" ? 20 : 45) : parsed.barWeight;
+        state.history = Array.isArray(parsed.history) ? parsed.history : [];
+        state.sessions = parsed.sessions && typeof parsed.sessions === "object" ? parsed.sessions : state.sessions;
 
-        state = loaded;
-        ensureSessionExists(loaded.selectedDate, loaded);
+        ensureSessionExists(state.selectedDate, state);
 
-        Object.keys(loaded.sessions).forEach(dateKey => {
-          const s = loaded.sessions[dateKey];
+        Object.keys(state.sessions).forEach(dateKey => {
+          const s = state.sessions[dateKey];
           s.phase = s.phase || "Phase 1";
           s.day = s.day || "Day A";
-          s.sex = s.sex || loaded.sex || "male";
+          s.sex = s.sex || state.sex || "male";
           s.bodyweight = s.bodyweight === undefined ? "" : s.bodyweight;
           s.notes = s.notes || "";
           s.exercises = Array.isArray(s.exercises) && s.exercises.length
             ? s.exercises.map(normalizeExercise)
-            : buildPrefilledTemplate(s.phase, s.day, s.sex, dateKey);
+            : templateFor(s.phase, s.day, s.sex);
         });
 
-        return loaded;
+        return state;
       } catch (e) {
         return defaultState();
       }
@@ -1120,6 +1050,15 @@
     function currentSession() {
       ensureSessionExists(state.selectedDate);
       return state.sessions[state.selectedDate];
+    }
+
+    function getPrimarySquatExercise(session) {
+      const priority = ["Squat", "Light Squat (80%)", "Front Squat"];
+      for (const name of priority) {
+        const found = session.exercises.find(x => String(x.exercise).trim().toLowerCase() === name.toLowerCase());
+        if (found) return found;
+      }
+      return session.exercises.find(x => String(x.exercise).toLowerCase().includes("squat")) || null;
     }
 
     function sessionMetrics(session) {
@@ -1157,9 +1096,10 @@
       state.history.push(payload);
     }
 
-    function persistOnly() {
+    function persistAndRefresh(options = {}) {
       upsertHistoryFromCurrentSession();
       saveState();
+      if (options.render !== false) render();
     }
 
     function nextJump(weight, type) {
@@ -1173,15 +1113,6 @@
       if (type === "upper") return w + 5;
       if (type === "pull") return w + 10;
       return w + 5;
-    }
-
-    function getPrimarySquatExercise(session) {
-      const priority = ["Squat", "Light Squat (80%)", "Front Squat"];
-      for (const name of priority) {
-        const found = session.exercises.find(x => String(x.exercise).trim().toLowerCase() === name.toLowerCase());
-        if (found) return found;
-      }
-      return session.exercises.find(x => String(x.exercise).toLowerCase().includes("squat")) || null;
     }
 
     function renderDateLabel() {
@@ -1377,9 +1308,8 @@
       session.day = day;
       session.sex = sex;
       state.sex = sex;
-      session.exercises = buildPrefilledTemplate(phase, day, sex, state.selectedDate);
-      persistOnly();
-      render();
+      session.exercises = templateFor(phase, day, sex);
+      persistAndRefresh();
     }
 
     function shiftSelectedDate(days) {
@@ -1387,8 +1317,7 @@
       d.setDate(d.getDate() + days);
       state.selectedDate = isoDate(d);
       ensureSessionExists(state.selectedDate);
-      persistOnly();
-      render();
+      persistAndRefresh();
     }
 
     function exportCsv() {
@@ -1421,7 +1350,7 @@
       URL.revokeObjectURL(url);
     }
 
-    state = loadState();
+    const state = loadState();
     upsertHistoryFromCurrentSession();
     saveState();
 
@@ -1453,30 +1382,27 @@
       if (!state.barWeight) state.barWeight = state.unit === "kg" ? 20 : 45;
       if (state.barWeight === 20 && state.unit === "lb") state.barWeight = 45;
       if (state.barWeight === 45 && state.unit === "kg") state.barWeight = 20;
-      persistOnly();
-      render();
+      persistAndRefresh();
     });
 
     document.getElementById("bodyweightInput").addEventListener("input", (e) => {
       currentSession().bodyweight = e.target.value;
-      persistOnly();
+      persistAndRefresh({render:false});
     });
 
     document.getElementById("notesInput").addEventListener("input", (e) => {
       currentSession().notes = e.target.value;
-      persistOnly();
+      persistAndRefresh({render:false});
     });
 
     document.getElementById("barWeightInput").addEventListener("input", (e) => {
       state.barWeight = e.target.value === "" ? "" : safeNumber(e.target.value);
-      persistOnly();
-      renderWarmup();
+      persistAndRefresh();
     });
 
     document.getElementById("addExercise").addEventListener("click", () => {
       currentSession().exercises.push(blankExercise());
-      persistOnly();
-      render();
+      persistAndRefresh();
     });
 
     document.addEventListener("input", (e) => {
@@ -1494,9 +1420,7 @@
       if (field === "reps") row.reps = Math.max(0, safeNumber(t.value));
       if (field === "weight") row.weight = t.value === "" ? "" : safeNumber(t.value);
 
-      persistOnly();
-      renderSummary();
-      renderWarmup();
+      persistAndRefresh();
     });
 
     document.addEventListener("change", (e) => {
@@ -1508,8 +1432,7 @@
       if (!row) return;
 
       row.completed = t.checked;
-      persistOnly();
-      renderSummary();
+      persistAndRefresh();
     });
 
     document.addEventListener("click", (e) => {
@@ -1517,8 +1440,7 @@
       if (!btn) return;
       const index = Number(btn.dataset.deleteIndex);
       currentSession().exercises.splice(index, 1);
-      persistOnly();
-      render();
+      persistAndRefresh();
     });
 
     render();
