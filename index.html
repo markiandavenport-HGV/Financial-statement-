@@ -188,13 +188,20 @@
     }
 
     .box-body{padding:0}
-
     .box-pad{padding:16px}
 
     .controls-grid{
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-columns:repeat(3,minmax(0,1fr));
       gap:12px;
+    }
+
+    .secondary-controls{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:12px;
+      margin-top:12px;
+      align-items:end;
     }
 
     .control-label{
@@ -207,10 +214,35 @@
       font-weight:700;
     }
 
+    .sex-toggle{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .check-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:14px;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .check-pill input{
+      margin:0;
+    }
+
     table{
       width:100%;
       border-collapse:collapse;
       border-spacing:0;
+      table-layout:fixed;
     }
 
     th,td{
@@ -423,7 +455,6 @@
 
     .hidden{display:none !important}
     .empty{text-align:center;color:var(--muted);padding:16px 0;font-size:13px}
-    .muted{color:var(--muted)}
     .note-area{
       width:100%;
       min-height:96px;
@@ -443,20 +474,48 @@
       box-shadow:0 0 0 3px rgba(0,113,227,.12);
     }
 
-    .pill{
-      display:inline-flex;
-      align-items:center;
+    .checkbox-wrap{
+      display:flex;
       justify-content:center;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      font-weight:700;
-      background:rgba(0,113,227,.08);
-      color:var(--accent);
+      align-items:center;
     }
 
-    .success{color:var(--success)}
-    .warning{color:var(--warning)}
+    .checkbox-wrap input{
+      width:18px;
+      height:18px;
+      cursor:pointer;
+      accent-color:var(--accent);
+    }
+
+    .history-exercises{
+      line-height:1.45;
+      white-space:normal;
+    }
+
+    .history-exercise-line{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid #f0f0f2;
+      padding:4px 0;
+    }
+
+    .history-exercise-line:last-child{
+      border-bottom:0;
+    }
+
+    .history-exercise-name{
+      color:var(--text);
+      font-weight:600;
+      min-width:0;
+      flex:1;
+    }
+
+    .history-exercise-weight{
+      color:var(--muted);
+      white-space:nowrap;
+      font-variant-numeric:tabular-nums;
+    }
 
     @media (max-width:1020px){
       .planner-layout,
@@ -468,8 +527,8 @@
         grid-template-columns:1fr 1fr;
       }
 
-      .controls-grid{
-        grid-template-columns:1fr 1fr;
+      .secondary-controls{
+        grid-template-columns:1fr;
       }
     }
 
@@ -497,6 +556,10 @@
       .row-btn{
         padding:6px 8px;
         font-size:11px;
+      }
+
+      table{
+        table-layout:auto;
       }
     }
   </style>
@@ -552,22 +615,53 @@
                         <option value="Day B">Day B</option>
                       </select>
                     </div>
+                  </div>
+
+                  <div class="secondary-controls">
                     <div>
                       <label class="control-label" for="bodyweightInput">Bodyweight</label>
                       <input id="bodyweightInput" class="field" type="number" step="0.1" placeholder="Optional">
+                    </div>
+
+                    <div>
+                      <label class="control-label">Sex</label>
+                      <div class="sex-toggle">
+                        <label class="check-pill">
+                          <input type="checkbox" id="maleCheckbox">
+                          <span>Male</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label class="control-label">&nbsp;</label>
+                      <div class="sex-toggle">
+                        <label class="check-pill">
+                          <input type="checkbox" id="femaleCheckbox">
+                          <span>Female</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <table>
+                  <colgroup>
+                    <col style="width:40%">
+                    <col style="width:11%">
+                    <col style="width:11%">
+                    <col style="width:16%">
+                    <col style="width:10%">
+                    <col style="width:12%">
+                  </colgroup>
                   <thead>
                     <tr>
                       <th>Exercise</th>
-                      <th style="width:90px;">Sets</th>
-                      <th style="width:90px;">Reps</th>
-                      <th style="width:120px;">Weight</th>
-                      <th style="width:130px;">Completed Sets</th>
-                      <th style="width:80px;"></th>
+                      <th>Sets</th>
+                      <th>Reps</th>
+                      <th>Weight</th>
+                      <th>Done</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody id="exerciseTable"></tbody>
@@ -613,7 +707,7 @@
             <div class="summary-card">
               <div class="summary-label">Session Status</div>
               <div class="summary-value" id="sessionStatus">Planned</div>
-              <div class="summary-note" id="sessionStatusNote">No sets marked complete yet.</div>
+              <div class="summary-note" id="sessionStatusNote">No lifts marked complete yet.</div>
             </div>
           </div>
         </div>
@@ -621,7 +715,7 @@
         <div class="cashflow-row">
           <div>
             <div class="cashflow-title">Session Volume</div>
-            <div class="cashflow-sub">(Completed sets × reps × weight)</div>
+            <div class="cashflow-sub">(Completed lifts × sets × reps × weight)</div>
           </div>
           <div class="cashflow-value" id="sessionVolumeHero">0 kg</div>
         </div>
@@ -677,9 +771,9 @@
 
                 <div style="height:14px;"></div>
 
-                <div class="summary-label">Tip</div>
+                <div class="summary-label">Female option</div>
                 <div class="summary-note" style="font-size:14px;line-height:1.5;">
-                  Use the calculator as a quick guide. Adjust slightly if plates available at your gym make a nearby load more practical.
+                  Female templates change the main work sets to 5 × 3 and replace power clean with RDL.
                 </div>
               </div>
             </div>
@@ -710,12 +804,20 @@
           <div class="box-title">Saved Sessions</div>
           <div class="box-body">
             <table>
+              <colgroup>
+                <col style="width:15%">
+                <col style="width:10%">
+                <col style="width:9%">
+                <col style="width:40%">
+                <col style="width:12%">
+                <col style="width:14%">
+              </colgroup>
               <thead>
                 <tr>
                   <th>Date</th>
                   <th>Phase</th>
                   <th>Day</th>
-                  <th>Exercises</th>
+                  <th>Lifts</th>
                   <th>Volume</th>
                   <th>Status</th>
                 </tr>
@@ -729,7 +831,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "starting-strength-tracker-v2";
+    const STORAGE_KEY = "starting-strength-tracker-v3";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -746,7 +848,7 @@
       return d.toLocaleDateString("en-GB", {
         weekday: "short",
         day: "numeric",
-        month: "long",
+        month: "short",
         year: "numeric"
       });
     }
@@ -770,6 +872,15 @@
       return fmtNumber(n) + " " + unit;
     }
 
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
     function blankExercise() {
       return {
         id: uid("ex"),
@@ -777,58 +888,71 @@
         sets: 3,
         reps: 5,
         weight: "",
-        completed: 0
+        completed: false
       };
     }
 
-    function templateFor(phase, day) {
+    function isFemaleTemplate(sex) {
+      return sex === "female";
+    }
+
+    function buildExercise(name, sets, reps) {
+      return {
+        id: uid("ex"),
+        exercise: name,
+        sets,
+        reps,
+        weight: "",
+        completed: false
+      };
+    }
+
+    function templateFor(phase, day, sex) {
+      const female = isFemaleTemplate(sex);
+      const mainSets = female ? 5 : 3;
+      const mainReps = female ? 3 : 5;
+      const pullName = female ? "RDL" : "Power Clean";
+
       const templates = {
         "Phase 1": {
           "Day A": [
-            { exercise: "Squat", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Bench Press", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Deadlift", sets: 1, reps: 5, weight: "", completed: 0 }
+            buildExercise("Squat", mainSets, mainReps),
+            buildExercise("Bench Press", mainSets, mainReps),
+            buildExercise("Deadlift", 1, 5)
           ],
           "Day B": [
-            { exercise: "Squat", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Press", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Power Clean", sets: 5, reps: 3, weight: "", completed: 0 }
+            buildExercise("Squat", mainSets, mainReps),
+            buildExercise("Press", mainSets, mainReps),
+            buildExercise(pullName, female ? 3 : 5, female ? 8 : 3)
           ]
         },
         "Phase 2": {
           "Day A": [
-            { exercise: "Squat", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Bench Press", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Deadlift", sets: 1, reps: 5, weight: "", completed: 0 }
+            buildExercise("Squat", mainSets, mainReps),
+            buildExercise("Bench Press", mainSets, mainReps),
+            buildExercise("Deadlift", 1, 5)
           ],
           "Day B": [
-            { exercise: "Light Squat (80%)", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Press", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Power Clean", sets: 5, reps: 3, weight: "", completed: 0 }
+            buildExercise("Light Squat (80%)", mainSets, mainReps),
+            buildExercise("Press", mainSets, mainReps),
+            buildExercise(pullName, female ? 3 : 5, female ? 8 : 3)
           ]
         },
         "Phase 3": {
           "Day A": [
-            { exercise: "Squat", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Bench Press", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Deadlift", sets: 1, reps: 5, weight: "", completed: 0 }
+            buildExercise("Squat", mainSets, mainReps),
+            buildExercise("Bench Press", mainSets, mainReps),
+            buildExercise("Deadlift", 1, 5)
           ],
           "Day B": [
-            { exercise: "Front Squat", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Press", sets: 3, reps: 5, weight: "", completed: 0 },
-            { exercise: "Power Clean / Chins", sets: 5, reps: 3, weight: "", completed: 0 }
+            buildExercise("Front Squat", mainSets, mainReps),
+            buildExercise("Press", mainSets, mainReps),
+            buildExercise(female ? "RDL" : "Power Clean / Chins", female ? 3 : 5, female ? 8 : 3)
           ]
         }
       };
 
-      return JSON.parse(JSON.stringify(templates[phase][day])).map(row => ({
-        id: uid("ex"),
-        exercise: row.exercise,
-        sets: row.sets,
-        reps: row.reps,
-        weight: row.weight,
-        completed: row.completed
-      }));
+      return templates[phase][day];
     }
 
     function defaultState() {
@@ -837,18 +961,43 @@
         selectedDate: today,
         viewMode: "session",
         unit: "kg",
+        sex: "male",
         barWeight: 20,
         squatWorkWeight: "",
         sessions: {
           [today]: {
             phase: "Phase 1",
             day: "Day A",
+            sex: "male",
             bodyweight: "",
             notes: "",
-            exercises: templateFor("Phase 1", "Day A")
+            exercises: templateFor("Phase 1", "Day A", "male")
           }
         },
         history: []
+      };
+    }
+
+    function ensureSessionExists(dateKey, stateRef = state) {
+      if (stateRef.sessions[dateKey]) return;
+      stateRef.sessions[dateKey] = {
+        phase: "Phase 1",
+        day: "Day A",
+        sex: stateRef.sex || "male",
+        bodyweight: "",
+        notes: "",
+        exercises: templateFor("Phase 1", "Day A", stateRef.sex || "male")
+      };
+    }
+
+    function normalizeExercise(r) {
+      return {
+        id: r.id || uid("ex"),
+        exercise: r.exercise || "",
+        sets: Math.max(0, safeNumber(r.sets)),
+        reps: Math.max(0, safeNumber(r.reps)),
+        weight: r.weight === "" || r.weight === null || r.weight === undefined ? "" : safeNumber(r.weight),
+        completed: typeof r.completed === "boolean" ? r.completed : safeNumber(r.completed) > 0
       };
     }
 
@@ -863,13 +1012,25 @@
         state.selectedDate = parsed.selectedDate || state.selectedDate;
         state.viewMode = parsed.viewMode || "session";
         state.unit = parsed.unit || "kg";
+        state.sex = parsed.sex || "male";
         state.barWeight = parsed.barWeight === undefined ? (state.unit === "kg" ? 20 : 45) : parsed.barWeight;
         state.squatWorkWeight = parsed.squatWorkWeight === undefined ? "" : parsed.squatWorkWeight;
         state.history = Array.isArray(parsed.history) ? parsed.history : [];
         state.sessions = parsed.sessions && typeof parsed.sessions === "object" ? parsed.sessions : state.sessions;
 
         ensureSessionExists(state.selectedDate, state);
-        normalizeSessions(state);
+
+        Object.keys(state.sessions).forEach(dateKey => {
+          const s = state.sessions[dateKey];
+          s.phase = s.phase || "Phase 1";
+          s.day = s.day || "Day A";
+          s.sex = s.sex || state.sex || "male";
+          s.bodyweight = s.bodyweight === undefined ? "" : s.bodyweight;
+          s.notes = s.notes || "";
+          s.exercises = Array.isArray(s.exercises) && s.exercises.length
+            ? s.exercises.map(normalizeExercise)
+            : templateFor(s.phase, s.day, s.sex);
+        });
 
         return state;
       } catch (e) {
@@ -877,37 +1038,8 @@
       }
     }
 
-    function normalizeSessions(state) {
-      Object.keys(state.sessions).forEach(dateKey => {
-        const s = state.sessions[dateKey];
-        s.phase = s.phase || "Phase 1";
-        s.day = s.day || "Day A";
-        s.bodyweight = s.bodyweight === undefined ? "" : s.bodyweight;
-        s.notes = s.notes || "";
-        s.exercises = Array.isArray(s.exercises) ? s.exercises.map(r => ({
-          id: r.id || uid("ex"),
-          exercise: r.exercise || "",
-          sets: safeNumber(r.sets),
-          reps: safeNumber(r.reps),
-          weight: r.weight === "" || r.weight === null || r.weight === undefined ? "" : safeNumber(r.weight),
-          completed: safeNumber(r.completed)
-        })) : templateFor(s.phase, s.day);
-      });
-    }
-
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    function ensureSessionExists(dateKey, stateRef = state) {
-      if (stateRef.sessions[dateKey]) return;
-      stateRef.sessions[dateKey] = {
-        phase: "Phase 1",
-        day: "Day A",
-        bodyweight: "",
-        notes: "",
-        exercises: templateFor("Phase 1", "Day A")
-      };
     }
 
     function currentSession() {
@@ -950,88 +1082,31 @@
           <td><input type="number" data-index="${index}" data-field="sets" value="${row.sets}"></td>
           <td><input type="number" data-index="${index}" data-field="reps" value="${row.reps}"></td>
           <td><input type="number" step="0.1" data-index="${index}" data-field="weight" value="${row.weight === '' ? '' : row.weight}"></td>
-          <td><input type="number" data-index="${index}" data-field="completed" min="0" max="${row.sets}" value="${row.completed}"></td>
+          <td class="checkbox-wrap"><input type="checkbox" data-index="${index}" data-field="completed" ${row.completed ? "checked" : ""}></td>
           <td class="actions"><button class="row-btn" type="button" data-delete-index="${index}">Delete</button></td>
         </tr>
       `).join("");
-    }
-
-    function escapeHtml(str) {
-      return String(str ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
     }
 
     function sessionMetrics(session) {
       const exercises = session.exercises || [];
       const totalSets = exercises.reduce((sum, r) => sum + safeNumber(r.sets), 0);
       const totalReps = exercises.reduce((sum, r) => sum + safeNumber(r.reps), 0);
-      const completedSets = exercises.reduce((sum, r) => sum + Math.min(safeNumber(r.completed), safeNumber(r.sets)), 0);
+      const completedLifts = exercises.filter(r => r.completed).length;
       const volume = exercises.reduce((sum, r) => {
-        return sum + (Math.min(safeNumber(r.completed), safeNumber(r.sets)) * safeNumber(r.reps) * safeNumber(r.weight));
+        return sum + (r.completed ? safeNumber(r.sets) * safeNumber(r.reps) * safeNumber(r.weight) : 0);
       }, 0);
 
-      const completionRate = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
+      const completionRate = exercises.length > 0 ? Math.round((completedLifts / exercises.length) * 100) : 0;
 
       return {
         totalSets,
         totalReps,
-        completedSets,
+        completedLifts,
+        totalLifts: exercises.length,
         volume,
         completionRate
       };
-    }
-
-    function renderSummary() {
-      const session = currentSession();
-      const metrics = sessionMetrics(session);
-      const exercises = session.exercises;
-      const unit = state.unit;
-
-      document.getElementById("selectedSession").textContent = session.phase + " / " + session.day;
-      document.getElementById("exerciseCount").textContent = exercises.length;
-      document.getElementById("exerciseBreakdown").textContent = exercises.map(x => x.exercise).filter(Boolean).join(", ") || "0 planned movements.";
-
-      let templateNote = "Standard novice progression template.";
-      if (session.phase === "Phase 2" && session.day === "Day B") templateNote = "Includes light squat at 80% on Day B.";
-      if (session.phase === "Phase 3" && session.day === "Day B") templateNote = "Includes front squat and power clean / chins on Day B.";
-      document.getElementById("templateNote").textContent = templateNote;
-
-      let status = "Planned";
-      let statusNote = "No sets marked complete yet.";
-      if (metrics.completionRate > 0 && metrics.completionRate < 100) {
-        status = "In Progress";
-        statusNote = metrics.completedSets + " of " + metrics.totalSets + " sets completed.";
-      }
-      if (metrics.completionRate === 100 && metrics.totalSets > 0) {
-        status = "Complete";
-        statusNote = "All planned sets completed.";
-      }
-
-      document.getElementById("sessionStatus").textContent = status;
-      document.getElementById("sessionStatusNote").textContent = statusNote;
-
-      document.getElementById("totalSets").textContent = metrics.totalSets;
-      document.getElementById("totalReps").textContent = metrics.totalReps;
-      document.getElementById("totalWeight").textContent = exercises.some(r => r.weight !== "") ? unit : "—";
-      document.getElementById("completionRate").textContent = metrics.completionRate + "%";
-      document.getElementById("sessionVolumeHero").textContent = fmtWeight(metrics.volume, unit);
-
-      const squat = exercises.find(x => x.exercise.toLowerCase().includes("squat"));
-      const bench = exercises.find(x => x.exercise.toLowerCase().includes("bench"));
-      const press = exercises.find(x => x.exercise.toLowerCase() === "press");
-      const deadlift = exercises.find(x => x.exercise.toLowerCase().includes("deadlift"));
-      const clean = exercises.find(x => x.exercise.toLowerCase().includes("clean") || x.exercise.toLowerCase().includes("chins"));
-
-      const upper = bench || press;
-      const pull = deadlift || clean;
-
-      document.getElementById("nextSquat").textContent = squat && squat.weight !== "" ? fmtWeight(nextJump(squat.weight, "squat"), unit) : "—";
-      document.getElementById("nextPressBench").textContent = upper && upper.weight !== "" ? fmtWeight(nextJump(upper.weight, "upper"), unit) : "—";
-      document.getElementById("nextPull").textContent = pull && pull.weight !== "" ? fmtWeight(nextJump(pull.weight, "pull"), unit) : "—";
     }
 
     function nextJump(weight, type) {
@@ -1047,6 +1122,58 @@
       return w + 5;
     }
 
+    function renderSummary() {
+      const session = currentSession();
+      const metrics = sessionMetrics(session);
+      const exercises = session.exercises;
+      const unit = state.unit;
+
+      document.getElementById("selectedSession").textContent = session.phase + " / " + session.day;
+      document.getElementById("exerciseCount").textContent = exercises.length;
+      document.getElementById("exerciseBreakdown").textContent = exercises.map(x => x.exercise).filter(Boolean).join(", ") || "0 planned movements.";
+
+      let templateNote = "Standard novice progression template.";
+      if (session.sex === "female") templateNote = "Female template uses 5 × 3 for main lifts and RDL instead of power clean.";
+      if (session.phase === "Phase 2" && session.day === "Day B" && session.sex === "male") templateNote = "Includes light squat at 80% on Day B.";
+      if (session.phase === "Phase 3" && session.day === "Day B" && session.sex === "male") templateNote = "Includes front squat and power clean / chins on Day B.";
+      if (session.phase === "Phase 2" && session.day === "Day B" && session.sex === "female") templateNote = "Includes light squat at 80%, 5 × 3 main work, and RDL.";
+      if (session.phase === "Phase 3" && session.day === "Day B" && session.sex === "female") templateNote = "Includes front squat, 5 × 3 main work, and RDL.";
+      document.getElementById("templateNote").textContent = templateNote;
+
+      let status = "Planned";
+      let statusNote = "No lifts marked complete yet.";
+      if (metrics.completionRate > 0 && metrics.completionRate < 100) {
+        status = "In Progress";
+        statusNote = metrics.completedLifts + " of " + metrics.totalLifts + " lifts completed.";
+      }
+      if (metrics.completionRate === 100 && metrics.totalLifts > 0) {
+        status = "Complete";
+        statusNote = "All planned lifts completed.";
+      }
+
+      document.getElementById("sessionStatus").textContent = status;
+      document.getElementById("sessionStatusNote").textContent = statusNote;
+
+      document.getElementById("totalSets").textContent = metrics.totalSets;
+      document.getElementById("totalReps").textContent = metrics.totalReps;
+      document.getElementById("totalWeight").textContent = exercises.some(r => r.weight !== "") ? unit : "—";
+      document.getElementById("completionRate").textContent = metrics.completionRate + "%";
+      document.getElementById("sessionVolumeHero").textContent = fmtWeight(metrics.volume, unit);
+
+      const squat = exercises.find(x => x.exercise.toLowerCase().includes("squat"));
+      const bench = exercises.find(x => x.exercise.toLowerCase().includes("bench"));
+      const press = exercises.find(x => x.exercise.toLowerCase() === "press");
+      const deadlift = exercises.find(x => x.exercise.toLowerCase().includes("deadlift"));
+      const clean = exercises.find(x => x.exercise.toLowerCase().includes("clean") || x.exercise.toLowerCase().includes("chins") || x.exercise.toLowerCase().includes("rdl"));
+
+      const upper = bench || press;
+      const pull = deadlift || clean;
+
+      document.getElementById("nextSquat").textContent = squat && squat.weight !== "" ? fmtWeight(nextJump(squat.weight, "squat"), unit) : "—";
+      document.getElementById("nextPressBench").textContent = upper && upper.weight !== "" ? fmtWeight(nextJump(upper.weight, "upper"), unit) : "—";
+      document.getElementById("nextPull").textContent = pull && pull.weight !== "" ? fmtWeight(nextJump(pull.weight, "pull"), unit) : "—";
+    }
+
     function renderSessionForm() {
       const session = currentSession();
       document.getElementById("phaseSelect").value = session.phase;
@@ -1056,6 +1183,8 @@
       document.getElementById("unitSelect").value = state.unit;
       document.getElementById("barWeightInput").value = state.barWeight;
       document.getElementById("squatWorkWeight").value = state.squatWorkWeight;
+      document.getElementById("maleCheckbox").checked = session.sex === "male";
+      document.getElementById("femaleCheckbox").checked = session.sex === "female";
       renderExerciseTable();
       renderSummary();
       renderWarmup();
@@ -1067,15 +1196,13 @@
       const bar = safeNumber(state.barWeight || (unit === "kg" ? 20 : 45));
       const inc = unit === "kg" ? 2.5 : 5;
 
-      const percRows = [
+      return [
         { label: "Set 1", pct: "Bar", reps: "2 × 5", weight: bar },
         { label: "Set 2", pct: "40%", reps: "1 × 5", weight: Math.max(bar, roundToIncrement(work * 0.40, inc)) },
         { label: "Set 3", pct: "60%", reps: "1 × 3", weight: Math.max(bar, roundToIncrement(work * 0.60, inc)) },
         { label: "Set 4", pct: "80%", reps: "1 × 2", weight: Math.max(bar, roundToIncrement(work * 0.80, inc)) },
         { label: "Set 5", pct: "90%", reps: "1 × 1", weight: Math.max(bar, roundToIncrement(work * 0.90, inc)) }
       ];
-
-      return percRows;
     }
 
     function renderWarmup() {
@@ -1105,16 +1232,25 @@
 
       const sorted = [...state.history].sort((a,b) => a.date < b.date ? 1 : -1);
 
-      tbody.innerHTML = sorted.map(item => `
-        <tr>
-          <td>${displayDate(item.date)}</td>
-          <td>${escapeHtml(item.phase)}</td>
-          <td>${escapeHtml(item.day)}</td>
-          <td>${escapeHtml(item.exerciseSummary)}</td>
-          <td class="readonly-cell">${fmtWeight(item.volume, item.unit)}</td>
-          <td class="readonly-cell">${item.completionRate}%</td>
-        </tr>
-      `).join("");
+      tbody.innerHTML = sorted.map(item => {
+        const exerciseLines = (item.exercises || []).map(ex => `
+          <div class="history-exercise-line">
+            <span class="history-exercise-name">${escapeHtml(ex.exercise)}</span>
+            <span class="history-exercise-weight">${ex.weight === "" ? "—" : fmtWeight(ex.weight, item.unit)}</span>
+          </div>
+        `).join("");
+
+        return `
+          <tr>
+            <td>${displayDate(item.date)}</td>
+            <td>${escapeHtml(item.phase)}</td>
+            <td>${escapeHtml(item.day)}</td>
+            <td class="history-exercises">${exerciseLines}</td>
+            <td class="readonly-cell">${fmtWeight(item.volume, item.unit)}</td>
+            <td class="readonly-cell">${item.completionRate}%</td>
+          </tr>
+        `;
+      }).join("");
     }
 
     function render() {
@@ -1127,11 +1263,13 @@
       }
     }
 
-    function applyTemplate(phase, day) {
+    function applyTemplate(phase, day, sex) {
       const session = currentSession();
       session.phase = phase;
       session.day = day;
-      session.exercises = templateFor(phase, day);
+      session.sex = sex;
+      state.sex = sex;
+      session.exercises = templateFor(phase, day, sex);
       saveState();
       render();
     }
@@ -1154,12 +1292,12 @@
         date: state.selectedDate,
         phase: session.phase,
         day: session.day,
+        sex: session.sex,
         bodyweight: session.bodyweight,
         notes: session.notes,
         unit: state.unit,
         volume: metrics.volume,
         completionRate: metrics.completionRate,
-        exerciseSummary: session.exercises.map(x => x.exercise).filter(Boolean).join(", "),
         exercises: JSON.parse(JSON.stringify(session.exercises))
       };
 
@@ -1175,11 +1313,12 @@
         ["Date", state.selectedDate],
         ["Phase", currentSession().phase],
         ["Day", currentSession().day],
+        ["Sex", currentSession().sex],
         ["Bodyweight", currentSession().bodyweight],
         ["Unit", state.unit],
         [],
-        ["Exercise", "Sets", "Reps", "Weight", "Completed Sets"],
-        ...currentSession().exercises.map(r => [r.exercise, r.sets, r.reps, r.weight, r.completed]),
+        ["Exercise", "Sets", "Reps", "Weight", "Completed"],
+        ...currentSession().exercises.map(r => [r.exercise, r.sets, r.reps, r.weight, r.completed ? "Yes" : "No"]),
         [],
         ["Warm-Up Set", "Percent", "Reps", "Weight"],
         ...warmupRows().map(r => [r.label, r.pct, r.reps, r.weight]),
@@ -1214,11 +1353,29 @@
     document.getElementById("exportBtn").addEventListener("click", exportCsv);
 
     document.getElementById("phaseSelect").addEventListener("change", (e) => {
-      applyTemplate(e.target.value, document.getElementById("daySelect").value);
+      applyTemplate(e.target.value, document.getElementById("daySelect").value, currentSession().sex);
     });
 
     document.getElementById("daySelect").addEventListener("change", (e) => {
-      applyTemplate(document.getElementById("phaseSelect").value, e.target.value);
+      applyTemplate(document.getElementById("phaseSelect").value, e.target.value, currentSession().sex);
+    });
+
+    document.getElementById("maleCheckbox").addEventListener("change", (e) => {
+      if (!e.target.checked) {
+        e.target.checked = true;
+        return;
+      }
+      document.getElementById("femaleCheckbox").checked = false;
+      applyTemplate(document.getElementById("phaseSelect").value, document.getElementById("daySelect").value, "male");
+    });
+
+    document.getElementById("femaleCheckbox").addEventListener("change", (e) => {
+      if (!e.target.checked) {
+        e.target.checked = true;
+        return;
+      }
+      document.getElementById("maleCheckbox").checked = false;
+      applyTemplate(document.getElementById("phaseSelect").value, document.getElementById("daySelect").value, "female");
     });
 
     document.getElementById("unitSelect").addEventListener("change", (e) => {
@@ -1271,8 +1428,20 @@
       if (field === "sets") row.sets = Math.max(0, safeNumber(t.value));
       if (field === "reps") row.reps = Math.max(0, safeNumber(t.value));
       if (field === "weight") row.weight = t.value === "" ? "" : safeNumber(t.value);
-      if (field === "completed") row.completed = Math.max(0, Math.min(safeNumber(t.value), safeNumber(row.sets)));
 
+      saveState();
+      renderSummary();
+    });
+
+    document.addEventListener("change", (e) => {
+      const t = e.target;
+      if (!t.matches('#exerciseTable input[type="checkbox"]')) return;
+
+      const index = Number(t.dataset.index);
+      const row = currentSession().exercises[index];
+      if (!row) return;
+
+      row.completed = t.checked;
       saveState();
       renderSummary();
     });
