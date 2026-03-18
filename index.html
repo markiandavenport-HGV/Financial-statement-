@@ -176,7 +176,7 @@
 
     .today-grid{
       display:grid;
-      grid-template-columns:1.2fr .8fr;
+      grid-template-columns:1.3fr .7fr;
       gap:16px;
       align-items:start;
     }
@@ -210,9 +210,48 @@
       line-height:1.35;
     }
 
+    .today-lifts{
+      margin-top:14px;
+      display:grid;
+      gap:8px;
+    }
+
+    .today-lift-line{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:8px 0;
+      border-bottom:1px solid #f0f0f2;
+    }
+
+    .today-lift-line:last-child{
+      border-bottom:0;
+      padding-bottom:0;
+    }
+
+    .today-lift-name{
+      font-weight:600;
+      min-width:0;
+      flex:1;
+    }
+
+    .today-lift-detail{
+      color:var(--muted);
+      white-space:nowrap;
+      font-variant-numeric:tabular-nums;
+      text-align:right;
+    }
+
+    .builder-top-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
     .builder-grid{
       display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
+      grid-template-columns:1fr 1fr 1fr;
       gap:10px;
       align-items:end;
     }
@@ -425,17 +464,17 @@
 
     .warmup-table th,
     .warmup-table td{
-      padding:16px 14px;
+      padding:16px 16px;
     }
 
     .warmup-table th:first-child,
     .warmup-table td:first-child{
-      padding-left:18px;
+      padding-left:20px;
     }
 
     .warmup-table th:last-child,
     .warmup-table td:last-child{
-      padding-right:18px;
+      padding-right:20px;
     }
 
     .history-lifts{
@@ -504,18 +543,13 @@
       font-variant-numeric:tabular-nums;
     }
 
-    .autosave-note{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:6px;
-    }
-
     .hidden{display:none !important}
     .empty{text-align:center;color:var(--muted);padding:16px 0;font-size:13px}
 
     @media (max-width:1100px){
+      .builder-top-grid,
       .builder-grid{
-        grid-template-columns:repeat(3,minmax(0,1fr));
+        grid-template-columns:repeat(2,minmax(0,1fr));
       }
       .today-grid,
       .warmup-layout{
@@ -541,6 +575,7 @@
         font-size:24px;
       }
 
+      .builder-top-grid,
       .builder-grid{
         grid-template-columns:1fr 1fr;
       }
@@ -561,6 +596,7 @@
     }
 
     @media (max-width:560px){
+      .builder-top-grid,
       .builder-grid{
         grid-template-columns:1fr;
       }
@@ -594,8 +630,10 @@
               <div class="summary-label">Today’s Workout</div>
               <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
               <div class="summary-note" id="templateNote">Standard novice progression template.</div>
-              <div class="autosave-note">Changes save automatically as you enter them.</div>
+
+              <div class="today-lifts" id="todayLiftsList"></div>
             </div>
+
             <div class="today-sub">
               <div class="summary-label">Current Template</div>
               <div class="summary-value" id="sexSummary">Male</div>
@@ -608,7 +646,7 @@
           <div class="box-title">Session Builder</div>
           <div class="box-body">
             <div class="box-pad">
-              <div class="builder-grid">
+              <div class="builder-top-grid">
                 <div>
                   <label class="control-label" for="unitSelect">Units</label>
                   <select id="unitSelect" class="select">
@@ -617,6 +655,16 @@
                   </select>
                 </div>
 
+                <div>
+                  <label class="control-label" for="sexSelect">Sex</label>
+                  <select id="sexSelect" class="select">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="builder-grid">
                 <div>
                   <label class="control-label" for="phaseSelect">Workout Type</label>
                   <select id="phaseSelect" class="select">
@@ -631,14 +679,6 @@
                   <select id="daySelect" class="select">
                     <option value="Day A">Day A</option>
                     <option value="Day B">Day B</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label class="control-label" for="sexSelect">Sex</label>
-                  <select id="sexSelect" class="select">
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
                   </select>
                 </div>
 
@@ -798,7 +838,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "starting-strength-tracker-v8";
+    const STORAGE_KEY = "starting-strength-tracker-v9";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -1116,6 +1156,23 @@
       `).join("");
     }
 
+    function renderTodayLifts() {
+      const wrap = document.getElementById("todayLiftsList");
+      const exercises = currentSession().exercises;
+
+      if (!exercises.length) {
+        wrap.innerHTML = `<div class="summary-note">No lifts added yet.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = exercises.map(ex => `
+        <div class="today-lift-line">
+          <span class="today-lift-name">${escapeHtml(ex.exercise || "Exercise")}</span>
+          <span class="today-lift-detail">${ex.weight === "" ? "—" : fmtWeight(ex.weight, state.unit)} · ${safeNumber(ex.sets)} × ${safeNumber(ex.reps)}</span>
+        </div>
+      `).join("");
+    }
+
     function renderSummary() {
       const session = currentSession();
       const metrics = sessionMetrics(session);
@@ -1138,6 +1195,8 @@
       document.getElementById("totalReps").textContent = metrics.totalReps;
       document.getElementById("totalWeight").textContent = exercises.some(r => r.weight !== "") ? unit : "—";
       document.getElementById("completionRate").textContent = metrics.completionRate + "%";
+
+      renderTodayLifts();
 
       const squat = getPrimarySquatExercise(session);
       const bench = exercises.find(x => x.exercise.toLowerCase().includes("bench"));
