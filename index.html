@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Financial Statement</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Starting Strength Workout Tracker</title>
   <style>
     :root{
       --bg:#f5f5f7;
@@ -18,6 +18,8 @@
       --soft:#f0f2f5;
       --shadow:0 8px 24px rgba(0,0,0,.06);
       --radius:18px;
+      --success:#177245;
+      --warning:#b05a00;
     }
 
     *{box-sizing:border-box}
@@ -85,9 +87,7 @@
       border-radius:999px;
     }
 
-    .period-nav:hover{
-      background:var(--soft);
-    }
+    .period-nav:hover{background:var(--soft)}
 
     .period-label{
       min-width:132px;
@@ -97,7 +97,7 @@
       color:var(--text);
     }
 
-    .select,.btn{
+    .select,.btn,.field{
       border:1px solid var(--line);
       background:#fff;
       color:var(--text);
@@ -108,13 +108,20 @@
       box-shadow:0 1px 2px rgba(0,0,0,.03);
     }
 
+    .field,
+    .select{
+      width:100%;
+      border-radius:12px;
+      box-shadow:none;
+      font-size:14px;
+    }
+
     .btn{
       cursor:pointer;
       font-weight:600;
     }
 
-    .btn:hover,
-    .select:hover{
+    .btn:hover,.select:hover,.field:hover{
       border-color:var(--line-strong);
     }
 
@@ -129,9 +136,7 @@
       color:var(--accent-hover);
     }
 
-    .sheet{
-      background:transparent;
-    }
+    .sheet{background:transparent}
 
     .section-heading{
       margin:0 0 10px;
@@ -142,7 +147,7 @@
       color:var(--muted);
     }
 
-    .income-layout{
+    .planner-layout{
       display:grid;
       grid-template-columns:1fr 320px;
       gap:16px;
@@ -150,12 +155,17 @@
       align-items:start;
     }
 
-    .balance-layout{
+    .two-col{
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:16px;
-      margin:0 auto 12px;
+      margin-bottom:16px;
       align-items:start;
+    }
+
+    .summary-side{
+      display:grid;
+      gap:12px;
     }
 
     .box{
@@ -177,17 +187,17 @@
       border-bottom:1px solid var(--line);
     }
 
-    .box-body{
-      padding:0;
+    .box-body{padding:0}
+
+    .box-pad{padding:16px}
+
+    .controls-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
     }
 
-    .mini-field-wrap{
-      padding:12px 14px 14px;
-      border-top:1px solid var(--line);
-      background:var(--panel-2);
-    }
-
-    .mini-field-label{
+    .control-label{
       display:block;
       font-size:11px;
       text-transform:uppercase;
@@ -195,21 +205,6 @@
       color:var(--muted);
       margin-bottom:6px;
       font-weight:700;
-    }
-
-    .mini-field{
-      width:100%;
-      border:1px solid var(--line);
-      background:#fff;
-      padding:10px 12px;
-      font-size:14px;
-      color:var(--text);
-      outline:none;
-      font-family:inherit;
-      text-align:right;
-      border-radius:12px;
-      -webkit-appearance:none;
-      appearance:none;
     }
 
     table{
@@ -236,7 +231,7 @@
       background:#fcfcfd;
     }
 
-    td input{
+    td input, td select, td textarea{
       width:100%;
       border:1px solid transparent;
       background:transparent;
@@ -250,12 +245,12 @@
       appearance:none;
     }
 
-    td input:hover{
+    td input:hover, td select:hover, td textarea:hover{
       background:#fafafc;
       border-color:#f0f0f2;
     }
 
-    td input:focus{
+    td input:focus, td select:focus, td textarea:focus{
       background:#fff;
       border-color:rgba(0,113,227,.35);
       box-shadow:0 0 0 3px rgba(0,113,227,.12);
@@ -264,16 +259,6 @@
     td input[type="number"]{
       text-align:right;
       min-width:0;
-    }
-
-    td input[readonly]{
-      color:#5c5c61;
-      background:#f7f7f8;
-      border-color:#ededf0;
-    }
-
-    .money-picker-target{
-      cursor:pointer;
     }
 
     .readonly-cell{
@@ -320,18 +305,6 @@
     .add-row:hover{
       background:rgba(0,113,227,.12);
       color:var(--accent-hover);
-    }
-
-    .summary-side{
-      display:grid;
-      gap:12px;
-    }
-
-    .summary-grid-year{
-      display:grid;
-      grid-template-columns:repeat(4, minmax(0,1fr));
-      gap:12px;
-      margin-bottom:16px;
     }
 
     .summary-card{
@@ -448,171 +421,54 @@
       font-variant-numeric:tabular-nums;
     }
 
-    .empty{
-      text-align:center;
-      color:var(--muted);
-      padding:16px 0;
-      font-size:13px;
-    }
-
-    .asset-table{
-      table-layout:auto;
-    }
-
-    .asset-desc-col{width:auto}
-    .asset-qty-col{width:50px}
-    .asset-price-col{width:88px}
-    .asset-total-col{width:108px}
-    .asset-action-col{width:58px}
-
-    .year-table th,
-    .year-table td{
-      padding:10px 10px;
-    }
-
-    .year-table td.num{
-      text-align:right;
-      font-variant-numeric:tabular-nums;
-    }
-
-    .hidden{
-      display:none !important;
-    }
-
-    .picker-overlay{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.28);
-      display:flex;
-      align-items:flex-end;
-      justify-content:center;
-      z-index:9999;
-      padding:12px;
-    }
-
-    .picker-sheet{
-      width:min(520px,100%);
-      background:rgba(248,248,248,.96);
-      backdrop-filter:blur(20px);
-      border-radius:22px;
-      box-shadow:0 20px 60px rgba(0,0,0,.25);
-      overflow:hidden;
-    }
-
-    .picker-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:14px 16px;
-      border-bottom:1px solid #d9d9de;
-      background:rgba(255,255,255,.72);
-    }
-
-    .picker-title{
-      font-size:16px;
-      font-weight:700;
-      letter-spacing:-.01em;
-    }
-
-    .picker-btn{
-      border:0;
-      background:transparent;
-      color:var(--accent);
-      font-size:16px;
-      font-weight:600;
-      padding:6px 8px;
-      cursor:pointer;
-    }
-
-    .picker-body{
-      padding:14px 16px 18px;
-    }
-
-    .picker-display{
-      text-align:center;
-      font-size:32px;
-      font-weight:700;
-      letter-spacing:-.03em;
-      padding:10px 0 14px;
-      font-variant-numeric:tabular-nums;
-    }
-
-    .picker-wheel-wrap{
-      position:relative;
-      height:220px;
-      border-radius:18px;
-      overflow:hidden;
-      background:linear-gradient(180deg,#f4f4f6 0%,#fff 35%,#fff 65%,#f4f4f6 100%);
-      border:1px solid #e2e2e7;
-    }
-
-    .picker-wheel{
-      height:220px;
-      overflow-y:auto;
-      scroll-snap-type:y mandatory;
-      -webkit-overflow-scrolling:touch;
-      padding:88px 0;
-      scrollbar-width:none;
-    }
-
-    .picker-wheel::-webkit-scrollbar{
-      display:none;
-    }
-
-    .picker-row{
-      height:44px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      scroll-snap-align:center;
-      font-size:24px;
-      color:#7a7a80;
-      font-variant-numeric:tabular-nums;
-    }
-
-    .picker-row.active{
-      color:var(--text);
-      font-weight:700;
-    }
-
-    .picker-highlight{
-      position:absolute;
-      left:10px;
-      right:10px;
-      top:88px;
-      height:44px;
-      border-radius:12px;
-      border-top:1px solid #d7d7dc;
-      border-bottom:1px solid #d7d7dc;
-      background:rgba(255,255,255,.72);
-      pointer-events:none;
-    }
-
-    .picker-quick{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      justify-content:center;
-      margin-top:14px;
-    }
-
-    .picker-chip{
+    .hidden{display:none !important}
+    .empty{text-align:center;color:var(--muted);padding:16px 0;font-size:13px}
+    .muted{color:var(--muted)}
+    .note-area{
+      width:100%;
+      min-height:96px;
       border:1px solid var(--line);
       background:#fff;
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:13px;
-      cursor:pointer;
+      padding:12px 14px;
+      font-size:14px;
+      color:var(--text);
+      outline:none;
+      font-family:inherit;
+      border-radius:14px;
+      resize:vertical;
     }
 
+    .note-area:focus{
+      border-color:rgba(0,113,227,.35);
+      box-shadow:0 0 0 3px rgba(0,113,227,.12);
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      background:rgba(0,113,227,.08);
+      color:var(--accent);
+    }
+
+    .success{color:var(--success)}
+    .warning{color:var(--warning)}
+
     @media (max-width:1020px){
-      .income-layout,
-      .balance-layout,
-      .summary-grid-year{
+      .planner-layout,
+      .two-col{
         grid-template-columns:1fr;
       }
 
       .summary-side{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .controls-grid{
         grid-template-columns:1fr 1fr;
       }
     }
@@ -630,28 +486,17 @@
         padding:6px 6px;
       }
 
-      .summary-value,
-      .cashflow-value,
-      .footer-value{
+      .summary-value,.cashflow-value,.footer-value{
         font-size:24px;
       }
 
-      .asset-qty-col{width:44px}
-      .asset-price-col{width:78px}
-      .asset-total-col{width:90px}
-      .asset-action-col{width:54px}
+      .controls-grid{
+        grid-template-columns:1fr;
+      }
 
       .row-btn{
         padding:6px 8px;
         font-size:11px;
-      }
-
-      .picker-display{
-        font-size:28px;
-      }
-
-      .picker-row{
-        font-size:22px;
       }
     }
   </style>
@@ -659,221 +504,223 @@
 <body>
   <div class="app">
     <div class="topbar">
-      <h1 class="page-title">Financial Statement</h1>
+      <h1 class="page-title">Starting Strength Workout Tracker</h1>
 
       <div class="toolbar">
         <div class="period-picker">
-          <button class="period-nav" id="prevPeriod" type="button">‹</button>
-          <div class="period-label" id="periodLabel">March 2026</div>
-          <button class="period-nav" id="nextPeriod" type="button">›</button>
+          <button class="period-nav" id="prevDay" type="button">‹</button>
+          <div class="period-label" id="dateLabel">Today</div>
+          <button class="period-nav" id="nextDay" type="button">›</button>
         </div>
 
-        <button class="btn primary" id="toggleViewBtn" type="button">Year View</button>
-
-        <select id="currencySelect" class="select">
-          <option value="GBP">GBP (£)</option>
-          <option value="USD">USD ($)</option>
-        </select>
-
+        <button class="btn primary" id="toggleViewBtn" type="button">History View</button>
+        <button class="btn" id="saveSessionBtn" type="button">Save Session</button>
         <button class="btn" id="exportBtn" type="button">Export CSV</button>
       </div>
     </div>
 
     <div class="sheet">
-      <div id="monthView">
-        <h2 class="section-heading">Income Statement</h2>
+      <div id="sessionView">
+        <h2 class="section-heading">Workout Setup</h2>
 
-        <div class="income-layout">
+        <div class="planner-layout">
           <div>
             <div class="box" style="margin-bottom:14px;">
-              <div class="box-title">Income</div>
+              <div class="box-title">Session Builder</div>
               <div class="box-body">
+                <div class="box-pad">
+                  <div class="controls-grid">
+                    <div>
+                      <label class="control-label" for="unitSelect">Units</label>
+                      <select id="unitSelect" class="select">
+                        <option value="kg">kg</option>
+                        <option value="lb">lb</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="control-label" for="phaseSelect">Workout Type</label>
+                      <select id="phaseSelect" class="select">
+                        <option value="Phase 1">Phase 1</option>
+                        <option value="Phase 2">Phase 2</option>
+                        <option value="Phase 3">Phase 3</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="control-label" for="daySelect">Day</label>
+                      <select id="daySelect" class="select">
+                        <option value="Day A">Day A</option>
+                        <option value="Day B">Day B</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="control-label" for="bodyweightInput">Bodyweight</label>
+                      <input id="bodyweightInput" class="field" type="number" step="0.1" placeholder="Optional">
+                    </div>
+                  </div>
+                </div>
+
                 <table>
                   <thead>
                     <tr>
-                      <th>Description</th>
-                      <th style="width:160px;">Cash Flow</th>
-                      <th style="width:74px;"></th>
+                      <th>Exercise</th>
+                      <th style="width:90px;">Sets</th>
+                      <th style="width:90px;">Reps</th>
+                      <th style="width:120px;">Weight</th>
+                      <th style="width:130px;">Completed Sets</th>
+                      <th style="width:80px;"></th>
                     </tr>
                   </thead>
-                  <tbody id="incomeTable"></tbody>
+                  <tbody id="exerciseTable"></tbody>
                   <tfoot>
                     <tr class="total-row">
-                      <td>Total Income</td>
-                      <td class="total-value" id="incomeTotalRow">£0</td>
+                      <td>Total</td>
+                      <td class="total-value" id="totalSets">0</td>
+                      <td class="total-value" id="totalReps">0</td>
+                      <td class="total-value" id="totalWeight">—</td>
+                      <td class="total-value" id="completionRate">0%</td>
                       <td></td>
                     </tr>
                   </tfoot>
                 </table>
-                <button class="add-row" type="button" id="addIncome">+ Add Income Row</button>
+
+                <button class="add-row" type="button" id="addExercise">+ Add Exercise Row</button>
               </div>
             </div>
 
             <div class="box">
-              <div class="box-title">Expenses</div>
+              <div class="box-title">Session Notes</div>
               <div class="box-body">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Description</th>
-                      <th style="width:160px;">Cash Flow</th>
-                      <th style="width:74px;"></th>
-                    </tr>
-                  </thead>
-                  <tbody id="expenseTable"></tbody>
-                  <tfoot>
-                    <tr class="total-row">
-                      <td>Total Expenses</td>
-                      <td class="total-value" id="expenseTotalRow">£0</td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
-                <button class="add-row" type="button" id="addExpense">+ Add Expense Row</button>
+                <div class="box-pad">
+                  <textarea id="notesInput" class="note-area" placeholder="Log how the session felt, cues, missed reps, recovery notes, or next-session targets."></textarea>
+                </div>
               </div>
             </div>
           </div>
 
           <div class="summary-side">
             <div class="summary-card">
-              <div class="summary-label">Passive Income</div>
-              <div class="summary-value" id="passiveIncome">£0</div>
-              <div class="summary-note">Cash flow from non-salary income.</div>
+              <div class="summary-label">Selected Session</div>
+              <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
+              <div class="summary-note" id="templateNote">Standard novice progression template.</div>
             </div>
 
             <div class="summary-card">
-              <div class="summary-label">Total Income</div>
-              <div class="summary-value" id="totalIncome">£0</div>
+              <div class="summary-label">Exercises</div>
+              <div class="summary-value" id="exerciseCount">0</div>
+              <div class="summary-note" id="exerciseBreakdown">0 planned movements.</div>
             </div>
 
             <div class="summary-card">
-              <div class="summary-label">Total Expenses</div>
-              <div class="summary-value" id="totalExpenses">£0</div>
+              <div class="summary-label">Session Status</div>
+              <div class="summary-value" id="sessionStatus">Planned</div>
+              <div class="summary-note" id="sessionStatusNote">No sets marked complete yet.</div>
             </div>
           </div>
         </div>
 
         <div class="cashflow-row">
           <div>
-            <div class="cashflow-title">Monthly Cash Flow</div>
-            <div class="cashflow-sub">(Total Income - Total Expenses)</div>
+            <div class="cashflow-title">Session Volume</div>
+            <div class="cashflow-sub">(Completed sets × reps × weight)</div>
           </div>
-          <div class="cashflow-value" id="cashflow">£0</div>
+          <div class="cashflow-value" id="sessionVolumeHero">0 kg</div>
         </div>
 
-        <h2 class="section-heading">Balance Sheet</h2>
-
-        <div class="balance-layout">
+        <h2 class="section-heading">Squat Warm-Up Calculator</h2>
+        <div class="two-col">
           <div class="box">
-            <div class="box-title">Assets</div>
+            <div class="box-title">Calculator</div>
             <div class="box-body">
-              <table class="asset-table">
-                <thead>
-                  <tr>
-                    <th class="asset-desc-col">Description</th>
-                    <th class="asset-qty-col">Qty</th>
-                    <th class="asset-price-col">Price</th>
-                    <th class="asset-total-col">Total</th>
-                    <th class="asset-action-col"></th>
-                  </tr>
-                </thead>
-                <tbody id="assetTable"></tbody>
-                <tfoot>
-                  <tr class="total-row">
-                    <td colspan="3">Total Assets</td>
-                    <td class="total-value" id="assetTotalRow">£0</td>
-                    <td></td>
-                  </tr>
-                </tfoot>
-              </table>
-
-              <div class="mini-field-wrap">
-                <label class="mini-field-label" for="btc200wmaInput">Enter Bitcoin 200 Week Moving Average</label>
-                <input class="mini-field money-picker-target" id="btc200wmaInput" type="number" step="1" inputmode="numeric" placeholder="Enter value">
+              <div class="box-pad">
+                <div class="controls-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+                  <div>
+                    <label class="control-label" for="squatWorkWeight">Squat Work Weight</label>
+                    <input id="squatWorkWeight" class="field" type="number" step="0.1" placeholder="e.g. 100" />
+                  </div>
+                  <div>
+                    <label class="control-label" for="barWeightInput">Bar Weight</label>
+                    <input id="barWeightInput" class="field" type="number" step="0.1" placeholder="20" />
+                  </div>
+                </div>
               </div>
 
-              <button class="add-row" type="button" id="addAsset">+ Add Asset Row</button>
-            </div>
-          </div>
-
-          <div class="box">
-            <div class="box-title">Liabilities</div>
-            <div class="box-body">
               <table>
                 <thead>
                   <tr>
-                    <th>Description</th>
-                    <th style="width:160px;">Value</th>
-                    <th style="width:74px;"></th>
+                    <th>Set</th>
+                    <th>Target %</th>
+                    <th>Reps</th>
+                    <th style="width:140px;">Weight</th>
                   </tr>
                 </thead>
-                <tbody id="liabilityTable"></tbody>
-                <tfoot>
-                  <tr class="total-row">
-                    <td>Total Liabilities</td>
-                    <td class="total-value" id="liabilityTotalRow">£0</td>
-                    <td></td>
-                  </tr>
-                </tfoot>
+                <tbody id="warmupTable"></tbody>
               </table>
-              <button class="add-row" type="button" id="addLiability">+ Add Liability Row</button>
+            </div>
+          </div>
+
+          <div class="box">
+            <div class="box-title">Warm-Up Notes</div>
+            <div class="box-body">
+              <div class="box-pad">
+                <div class="summary-label">How it works</div>
+                <div class="summary-note" style="font-size:14px;line-height:1.5;">
+                  Empty bar, then approximately 40%, 60%, 80%, and 90% of your work-set squat.
+                  Weights round to the nearest <span id="roundingLabel">2.5 kg</span>.
+                </div>
+
+                <div style="height:14px;"></div>
+
+                <div class="summary-label">Template</div>
+                <div class="summary-note" style="font-size:14px;line-height:1.5;">
+                  2 × 5 empty bar, 1 × 5 at 40%, 1 × 3 at 60%, 1 × 2 at 80%, 1 × 1 at 90%.
+                </div>
+
+                <div style="height:14px;"></div>
+
+                <div class="summary-label">Tip</div>
+                <div class="summary-note" style="font-size:14px;line-height:1.5;">
+                  Use the calculator as a quick guide. Adjust slightly if plates available at your gym make a nearby load more practical.
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
+        <h2 class="section-heading">Planned Progression</h2>
         <div class="footer-summary">
           <div class="footer-item">
-            <div class="footer-label">Assets</div>
-            <div class="footer-value" id="assetsFooterValue">£0</div>
+            <div class="footer-label">Next Squat</div>
+            <div class="footer-value" id="nextSquat">—</div>
+          </div>
+          <div class="footer-item">
+            <div class="footer-label">Next Press / Bench</div>
+            <div class="footer-value" id="nextPressBench">—</div>
+          </div>
+          <div class="footer-item">
+            <div class="footer-label">Next Pull</div>
+            <div class="footer-value" id="nextPull">—</div>
           </div>
         </div>
       </div>
 
-      <div id="yearView" class="hidden">
-        <h2 class="section-heading">Year Overview</h2>
-
-        <div class="summary-grid-year">
-          <div class="summary-card">
-            <div class="summary-label">Annual Income</div>
-            <div class="summary-value" id="yearIncomeTotal">£0</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">Annual Passive Income</div>
-            <div class="summary-value" id="yearPassiveTotal">£0</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">Annual Cash Flow</div>
-            <div class="summary-value" id="yearCashflowTotal">£0</div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-label">Year-End Assets</div>
-            <div class="summary-value" id="yearEndAssets">£0</div>
-          </div>
-        </div>
+      <div id="historyView" class="hidden">
+        <h2 class="section-heading">Workout History</h2>
 
         <div class="box">
-          <div class="box-title">Monthly Summary</div>
+          <div class="box-title">Saved Sessions</div>
           <div class="box-body">
-            <table class="year-table">
+            <table>
               <thead>
                 <tr>
-                  <th>Month</th>
-                  <th>Income</th>
-                  <th>Passive Income</th>
-                  <th>Assets</th>
-                  <th>Net Liabilities</th>
+                  <th>Date</th>
+                  <th>Phase</th>
+                  <th>Day</th>
+                  <th>Exercises</th>
+                  <th>Volume</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody id="yearTableBody"></tbody>
-              <tfoot>
-                <tr class="total-row">
-                  <td>Year End / Totals</td>
-                  <td class="total-value" id="yearIncomeFooter">£0</td>
-                  <td class="total-value" id="yearPassiveFooter">£0</td>
-                  <td class="total-value" id="yearAssetsFooter">£0</td>
-                  <td class="total-value" id="yearLiabilityFooter">£0</td>
-                </tr>
-              </tfoot>
+              <tbody id="historyTable"></tbody>
             </table>
           </div>
         </div>
@@ -881,92 +728,27 @@
     </div>
   </div>
 
-  <div id="moneyPickerOverlay" class="picker-overlay hidden" aria-hidden="true">
-    <div class="picker-sheet">
-      <div class="picker-head">
-        <button class="picker-btn" id="pickerCancelBtn" type="button">Cancel</button>
-        <div class="picker-title" id="pickerTitle">Choose amount</div>
-        <button class="picker-btn" id="pickerDoneBtn" type="button">Done</button>
-      </div>
-      <div class="picker-body">
-        <div class="picker-display" id="pickerDisplay">£0</div>
-        <div class="picker-wheel-wrap">
-          <div class="picker-highlight"></div>
-          <div class="picker-wheel" id="pickerWheel"></div>
-        </div>
-        <div class="picker-quick">
-          <button class="picker-chip" type="button" data-picker-jump="-100">-100</button>
-          <button class="picker-chip" type="button" data-picker-jump="-10">-10</button>
-          <button class="picker-chip" type="button" data-picker-jump="10">+10</button>
-          <button class="picker-chip" type="button" data-picker-jump="100">+100</button>
-          <button class="picker-chip" type="button" data-picker-set="0">Set 0</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
-    function monthKeyFromDate(d) {
-      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
-    }
-
-    function currentMonthKey() {
-      return monthKeyFromDate(new Date());
-    }
-
-    function blankMonth() {
-      return { income: [], expenses: [], assets: [], liabilities: [] };
-    }
-
-    const STORAGE_KEY = "kyosaki-financial-statement-v4";
-
-    const defaultState = {
-      currency: "GBP",
-      selectedMonth: currentMonthKey(),
-      selectedYear: new Date().getFullYear(),
-      viewMode: "month",
-      btc200wma: "",
-      months: {
-        [currentMonthKey()]: blankMonth()
-      }
-    };
-
-    function shiftMonth(monthKey, delta) {
-      const parts = monthKey.split("-").map(Number);
-      const d = new Date(parts[0], parts[1] - 1 + delta, 1);
-      return monthKeyFromDate(d);
-    }
-
-    function formatMonthLabel(monthKey) {
-      const parts = monthKey.split("-").map(Number);
-      return new Date(parts[0], parts[1] - 1, 1).toLocaleDateString("en-GB", {
-        month: "long",
-        year: "numeric"
-      });
-    }
-
-    function formatYearMonthLabel(year, monthIndexZero) {
-      return new Date(year, monthIndexZero, 1).toLocaleDateString("en-GB", {
-        month: "long"
-      });
-    }
+    const STORAGE_KEY = "starting-strength-tracker-v2";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
     }
 
-    function blankAssetRow() {
-      return {
-        id: uid("ast"),
-        description: "",
-        quantity: "",
-        unitPrice: "",
-        amount: 0
-      };
+    function isoDate(d) {
+      const x = new Date(d);
+      x.setHours(0,0,0,0);
+      return x.toISOString().slice(0,10);
     }
 
-    function deepCopy(obj) {
-      return JSON.parse(JSON.stringify(obj));
+    function displayDate(iso) {
+      const d = new Date(iso + "T00:00:00");
+      return d.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
     }
 
     function safeNumber(value) {
@@ -975,147 +757,203 @@
       return Number.isFinite(n) ? n : 0;
     }
 
-    function normalizeMoneyValue(value) {
-      if (value === "" || value === null || value === undefined) return "";
-      return Math.round(safeNumber(value));
+    function roundToIncrement(value, increment) {
+      return Math.round(value / increment) * increment;
     }
 
-    function normalizeRow(row, prefix) {
+    function fmtNumber(n) {
+      if (!Number.isFinite(n)) return "0";
+      return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(1)));
+    }
+
+    function fmtWeight(n, unit) {
+      return fmtNumber(n) + " " + unit;
+    }
+
+    function blankExercise() {
       return {
-        id: row && row.id ? row.id : uid(prefix),
-        description: row && typeof row.description === "string" ? row.description : "",
-        amount: row && row.amount !== undefined && row.amount !== null && row.amount !== "" ? safeNumber(row.amount) : 0
+        id: uid("ex"),
+        exercise: "",
+        sets: 3,
+        reps: 5,
+        weight: "",
+        completed: 0
       };
     }
 
-    function migrateAssetRow(row) {
-      if (!row) return blankAssetRow();
-
-      if ("quantity" in row || "unitPrice" in row) {
-        return {
-          id: row.id || uid("ast"),
-          description: typeof row.description === "string" ? row.description : "",
-          quantity: row.quantity === "" || row.quantity === null || row.quantity === undefined ? "" : safeNumber(row.quantity),
-          unitPrice: row.unitPrice === "" || row.unitPrice === null || row.unitPrice === undefined ? "" : safeNumber(row.unitPrice),
-          amount: row.amount !== undefined ? safeNumber(row.amount) : 0
-        };
-      }
-
-      const oldAmount = safeNumber(row.amount);
-      const oldType = String(row.assetType || "");
-      const oldDesc = typeof row.description === "string" ? row.description : "";
-      const description = oldType && !oldDesc ? oldType : oldDesc;
-      const quantity = oldAmount ? 1 : "";
-      const isBitcoin = oldType.toLowerCase() === "bitcoin" || oldDesc.toLowerCase().includes("bitcoin");
-
-      return {
-        id: row.id || uid("ast"),
-        description,
-        quantity,
-        unitPrice: isBitcoin ? "" : (oldAmount ? oldAmount : ""),
-        amount: oldAmount
+    function templateFor(phase, day) {
+      const templates = {
+        "Phase 1": {
+          "Day A": [
+            { exercise: "Squat", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Bench Press", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Deadlift", sets: 1, reps: 5, weight: "", completed: 0 }
+          ],
+          "Day B": [
+            { exercise: "Squat", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Press", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Power Clean", sets: 5, reps: 3, weight: "", completed: 0 }
+          ]
+        },
+        "Phase 2": {
+          "Day A": [
+            { exercise: "Squat", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Bench Press", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Deadlift", sets: 1, reps: 5, weight: "", completed: 0 }
+          ],
+          "Day B": [
+            { exercise: "Light Squat (80%)", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Press", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Power Clean", sets: 5, reps: 3, weight: "", completed: 0 }
+          ]
+        },
+        "Phase 3": {
+          "Day A": [
+            { exercise: "Squat", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Bench Press", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Deadlift", sets: 1, reps: 5, weight: "", completed: 0 }
+          ],
+          "Day B": [
+            { exercise: "Front Squat", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Press", sets: 3, reps: 5, weight: "", completed: 0 },
+            { exercise: "Power Clean / Chins", sets: 5, reps: 3, weight: "", completed: 0 }
+          ]
+        }
       };
+
+      return JSON.parse(JSON.stringify(templates[phase][day])).map(row => ({
+        id: uid("ex"),
+        exercise: row.exercise,
+        sets: row.sets,
+        reps: row.reps,
+        weight: row.weight,
+        completed: row.completed
+      }));
     }
 
-    function normalizeMonth(month) {
+    function defaultState() {
+      const today = isoDate(new Date());
       return {
-        income: Array.isArray(month && month.income) ? month.income.map(r => normalizeRow(r, "inc")) : [],
-        expenses: Array.isArray(month && month.expenses) ? month.expenses.map(r => normalizeRow(r, "exp")) : [],
-        assets: Array.isArray(month && month.assets) ? month.assets.map(r => migrateAssetRow(r)) : [],
-        liabilities: Array.isArray(month && month.liabilities) ? month.liabilities.map(r => normalizeRow(r, "lia")) : []
+        selectedDate: today,
+        viewMode: "session",
+        unit: "kg",
+        barWeight: 20,
+        squatWorkWeight: "",
+        sessions: {
+          [today]: {
+            phase: "Phase 1",
+            day: "Day A",
+            bodyweight: "",
+            notes: "",
+            exercises: templateFor("Phase 1", "Day A")
+          }
+        },
+        history: []
       };
     }
 
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return deepCopy(defaultState);
+        if (!raw) return defaultState();
 
         const parsed = JSON.parse(raw);
-        const state = {
-          currency: parsed.currency || "GBP",
-          selectedMonth: parsed.selectedMonth || currentMonthKey(),
-          selectedYear: parsed.selectedYear || Number((parsed.selectedMonth || currentMonthKey()).split("-")[0]),
-          viewMode: parsed.viewMode || "month",
-          btc200wma: parsed.btc200wma === undefined ? "" : parsed.btc200wma,
-          months: {}
-        };
+        const state = defaultState();
 
-        if (parsed.months && typeof parsed.months === "object") {
-          for (const key in parsed.months) {
-            state.months[key] = normalizeMonth(parsed.months[key]);
-          }
-        }
+        state.selectedDate = parsed.selectedDate || state.selectedDate;
+        state.viewMode = parsed.viewMode || "session";
+        state.unit = parsed.unit || "kg";
+        state.barWeight = parsed.barWeight === undefined ? (state.unit === "kg" ? 20 : 45) : parsed.barWeight;
+        state.squatWorkWeight = parsed.squatWorkWeight === undefined ? "" : parsed.squatWorkWeight;
+        state.history = Array.isArray(parsed.history) ? parsed.history : [];
+        state.sessions = parsed.sessions && typeof parsed.sessions === "object" ? parsed.sessions : state.sessions;
 
-        if (!state.months[state.selectedMonth]) {
-          state.months[state.selectedMonth] = blankMonth();
-        }
+        ensureSessionExists(state.selectedDate, state);
+        normalizeSessions(state);
 
         return state;
       } catch (e) {
-        return deepCopy(defaultState);
+        return defaultState();
       }
     }
 
-    let state = loadState();
-
-    const moneyPicker = {
-      target: null,
-      currentValue: 0,
-      min: -100000,
-      max: 1000000,
-      step: 1,
-      title: "Choose amount"
-    };
+    function normalizeSessions(state) {
+      Object.keys(state.sessions).forEach(dateKey => {
+        const s = state.sessions[dateKey];
+        s.phase = s.phase || "Phase 1";
+        s.day = s.day || "Day A";
+        s.bodyweight = s.bodyweight === undefined ? "" : s.bodyweight;
+        s.notes = s.notes || "";
+        s.exercises = Array.isArray(s.exercises) ? s.exercises.map(r => ({
+          id: r.id || uid("ex"),
+          exercise: r.exercise || "",
+          sets: safeNumber(r.sets),
+          reps: safeNumber(r.reps),
+          weight: r.weight === "" || r.weight === null || r.weight === undefined ? "" : safeNumber(r.weight),
+          completed: safeNumber(r.completed)
+        })) : templateFor(s.phase, s.day);
+      });
+    }
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
 
-    function ensureMonthExists(monthKey) {
-      if (state.months[monthKey]) return;
+    function ensureSessionExists(dateKey, stateRef = state) {
+      if (stateRef.sessions[dateKey]) return;
+      stateRef.sessions[dateKey] = {
+        phase: "Phase 1",
+        day: "Day A",
+        bodyweight: "",
+        notes: "",
+        exercises: templateFor("Phase 1", "Day A")
+      };
+    }
 
-      const previousKey = shiftMonth(monthKey, -1);
-      if (state.months[previousKey]) {
-        state.months[monthKey] = {
-          income: state.months[previousKey].income.map(r => ({ ...r, id: uid("inc") })),
-          expenses: state.months[previousKey].expenses.map(r => ({ ...r, id: uid("exp") })),
-          assets: state.months[previousKey].assets.map(r => ({ ...r, id: uid("ast") })),
-          liabilities: state.months[previousKey].liabilities.map(r => ({ ...r, id: uid("lia") }))
-        };
+    function currentSession() {
+      ensureSessionExists(state.selectedDate);
+      return state.sessions[state.selectedDate];
+    }
+
+    function renderDateLabel() {
+      document.getElementById("dateLabel").textContent = displayDate(state.selectedDate);
+    }
+
+    function renderViewMode() {
+      const sessionView = document.getElementById("sessionView");
+      const historyView = document.getElementById("historyView");
+      const toggleBtn = document.getElementById("toggleViewBtn");
+
+      if (state.viewMode === "session") {
+        sessionView.classList.remove("hidden");
+        historyView.classList.add("hidden");
+        toggleBtn.textContent = "History View";
       } else {
-        state.months[monthKey] = blankMonth();
+        sessionView.classList.add("hidden");
+        historyView.classList.remove("hidden");
+        toggleBtn.textContent = "Session View";
       }
     }
 
-    function getMonthData(monthKey) {
-      ensureMonthExists(monthKey);
-      const month = state.months[monthKey];
-      recalcAssets(month);
-      return month;
-    }
+    function renderExerciseTable() {
+      const tbody = document.getElementById("exerciseTable");
+      const exercises = currentSession().exercises;
 
-    function currentMonth() {
-      return getMonthData(state.selectedMonth);
-    }
+      if (!exercises.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">No exercises yet.</td></tr>';
+        return;
+      }
 
-    function fmtMoney(n) {
-      return new Intl.NumberFormat(
-        state.currency === "GBP" ? "en-GB" : "en-US",
-        { style: "currency", currency: state.currency, maximumFractionDigits: 0 }
-      ).format(Number(n || 0));
-    }
-
-    function sumRows(rows) {
-      return rows.reduce((sum, row) => sum + Number(row.amount || 0), 0);
-    }
-
-    function sumPassiveIncome(rows) {
-      return rows.reduce((sum, row) => {
-        const desc = String(row.description || "").toLowerCase();
-        if (desc.includes("salary")) return sum;
-        return sum + Number(row.amount || 0);
-      }, 0);
+      tbody.innerHTML = exercises.map((row, index) => `
+        <tr>
+          <td><input type="text" data-index="${index}" data-field="exercise" value="${escapeHtml(row.exercise)}"></td>
+          <td><input type="number" data-index="${index}" data-field="sets" value="${row.sets}"></td>
+          <td><input type="number" data-index="${index}" data-field="reps" value="${row.reps}"></td>
+          <td><input type="number" step="0.1" data-index="${index}" data-field="weight" value="${row.weight === '' ? '' : row.weight}"></td>
+          <td><input type="number" data-index="${index}" data-field="completed" min="0" max="${row.sets}" value="${row.completed}"></td>
+          <td class="actions"><button class="row-btn" type="button" data-delete-index="${index}">Delete</button></td>
+        </tr>
+      `).join("");
     }
 
     function escapeHtml(str) {
@@ -1127,622 +965,327 @@
         .replace(/'/g, "&#039;");
     }
 
-    function isBitcoinRow(row) {
-      return String(row.description || "").toLowerCase().includes("bitcoin");
-    }
+    function sessionMetrics(session) {
+      const exercises = session.exercises || [];
+      const totalSets = exercises.reduce((sum, r) => sum + safeNumber(r.sets), 0);
+      const totalReps = exercises.reduce((sum, r) => sum + safeNumber(r.reps), 0);
+      const completedSets = exercises.reduce((sum, r) => sum + Math.min(safeNumber(r.completed), safeNumber(r.sets)), 0);
+      const volume = exercises.reduce((sum, r) => {
+        return sum + (Math.min(safeNumber(r.completed), safeNumber(r.sets)) * safeNumber(r.reps) * safeNumber(r.weight));
+      }, 0);
 
-    function assetAmount(row) {
-      const qty = safeNumber(row.quantity);
-      if (isBitcoinRow(row)) {
-        return qty * safeNumber(state.btc200wma);
-      }
-      return qty * safeNumber(row.unitPrice);
-    }
-
-    function recalcAssets(month) {
-      month.assets.forEach(row => {
-        row.amount = assetAmount(row);
-      });
-    }
-
-    function getMonthMetrics(monthKey) {
-      const month = getMonthData(monthKey);
-      const totalIncome = sumRows(month.income);
-      const passiveIncome = sumPassiveIncome(month.income);
-      const totalExpenses = sumRows(month.expenses);
-      const totalAssets = sumRows(month.assets);
-      const totalLiabilities = sumRows(month.liabilities);
+      const completionRate = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
 
       return {
-        totalIncome,
-        passiveIncome,
-        totalExpenses,
-        totalAssets,
-        totalLiabilities,
-        cashflow: totalIncome - totalExpenses
+        totalSets,
+        totalReps,
+        completedSets,
+        volume,
+        completionRate
       };
     }
 
-    function yearMonthKey(year, monthNumber) {
-      return year + "-" + String(monthNumber).padStart(2, "0");
-    }
+    function renderSummary() {
+      const session = currentSession();
+      const metrics = sessionMetrics(session);
+      const exercises = session.exercises;
+      const unit = state.unit;
 
-    function yearMetrics(year) {
-      const rows = [];
-      for (let m = 1; m <= 12; m++) {
-        const key = yearMonthKey(year, m);
-        rows.push({
-          key,
-          monthName: formatYearMonthLabel(year, m - 1),
-          ...getMonthMetrics(key)
-        });
+      document.getElementById("selectedSession").textContent = session.phase + " / " + session.day;
+      document.getElementById("exerciseCount").textContent = exercises.length;
+      document.getElementById("exerciseBreakdown").textContent = exercises.map(x => x.exercise).filter(Boolean).join(", ") || "0 planned movements.";
+
+      let templateNote = "Standard novice progression template.";
+      if (session.phase === "Phase 2" && session.day === "Day B") templateNote = "Includes light squat at 80% on Day B.";
+      if (session.phase === "Phase 3" && session.day === "Day B") templateNote = "Includes front squat and power clean / chins on Day B.";
+      document.getElementById("templateNote").textContent = templateNote;
+
+      let status = "Planned";
+      let statusNote = "No sets marked complete yet.";
+      if (metrics.completionRate > 0 && metrics.completionRate < 100) {
+        status = "In Progress";
+        statusNote = metrics.completedSets + " of " + metrics.totalSets + " sets completed.";
       }
-      return rows;
-    }
-
-    function isMoneyField(type, field) {
-      if (type === "income" && field === "amount") return true;
-      if (type === "expenses" && field === "amount") return true;
-      if (type === "liabilities" && field === "amount") return true;
-      if (type === "assets" && field === "unitPrice") return true;
-      return false;
-    }
-
-    function renderIncomeExpenseTable(tbodyId, rows, type) {
-      const tbody = document.getElementById(tbodyId);
-      if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="3" class="empty">No rows yet.</td></tr>';
-        return;
+      if (metrics.completionRate === 100 && metrics.totalSets > 0) {
+        status = "Complete";
+        statusNote = "All planned sets completed.";
       }
 
-      tbody.innerHTML = rows.map((row, index) => `
-        <tr data-row-type="${type}" data-row-index="${index}">
-          <td><input type="text" value="${escapeHtml(row.description)}" data-type="${type}" data-index="${index}" data-field="description"></td>
-          <td><input class="money-picker-target" type="number" step="1" inputmode="numeric" value="${row.amount === 0 ? "" : Math.round(row.amount)}" data-type="${type}" data-index="${index}" data-field="amount"></td>
-          <td class="actions"><button class="row-btn" type="button" data-delete-type="${type}" data-delete-index="${index}">Delete</button></td>
-        </tr>
-      `).join("");
+      document.getElementById("sessionStatus").textContent = status;
+      document.getElementById("sessionStatusNote").textContent = statusNote;
+
+      document.getElementById("totalSets").textContent = metrics.totalSets;
+      document.getElementById("totalReps").textContent = metrics.totalReps;
+      document.getElementById("totalWeight").textContent = exercises.some(r => r.weight !== "") ? unit : "—";
+      document.getElementById("completionRate").textContent = metrics.completionRate + "%";
+      document.getElementById("sessionVolumeHero").textContent = fmtWeight(metrics.volume, unit);
+
+      const squat = exercises.find(x => x.exercise.toLowerCase().includes("squat"));
+      const bench = exercises.find(x => x.exercise.toLowerCase().includes("bench"));
+      const press = exercises.find(x => x.exercise.toLowerCase() === "press");
+      const deadlift = exercises.find(x => x.exercise.toLowerCase().includes("deadlift"));
+      const clean = exercises.find(x => x.exercise.toLowerCase().includes("clean") || x.exercise.toLowerCase().includes("chins"));
+
+      const upper = bench || press;
+      const pull = deadlift || clean;
+
+      document.getElementById("nextSquat").textContent = squat && squat.weight !== "" ? fmtWeight(nextJump(squat.weight, "squat"), unit) : "—";
+      document.getElementById("nextPressBench").textContent = upper && upper.weight !== "" ? fmtWeight(nextJump(upper.weight, "upper"), unit) : "—";
+      document.getElementById("nextPull").textContent = pull && pull.weight !== "" ? fmtWeight(nextJump(pull.weight, "pull"), unit) : "—";
     }
 
-    function renderAssetTable(rows) {
-      const tbody = document.getElementById("assetTable");
-      if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty">No rows yet.</td></tr>';
-        return;
+    function nextJump(weight, type) {
+      const unit = state.unit;
+      const w = safeNumber(weight);
+      if (unit === "kg") {
+        if (type === "upper") return w + 2.5;
+        if (type === "pull") return w + 5;
+        return w + 2.5;
       }
-
-      tbody.innerHTML = rows.map((row, index) => {
-        const total = assetAmount(row);
-        const bitcoin = isBitcoinRow(row);
-
-        return `
-          <tr data-row-type="assets" data-row-index="${index}">
-            <td><input type="text" value="${escapeHtml(row.description)}" data-type="assets" data-index="${index}" data-field="description"></td>
-            <td><input type="number" step="0.00000001" inputmode="decimal" value="${row.quantity === "" ? "" : row.quantity}" data-type="assets" data-index="${index}" data-field="quantity"></td>
-            <td><input class="${bitcoin ? "" : "money-picker-target"}" type="number" step="1" inputmode="numeric" value="${bitcoin ? (state.btc200wma === "" ? "" : Math.round(state.btc200wma)) : (row.unitPrice === "" ? "" : Math.round(row.unitPrice))}" data-type="assets" data-index="${index}" data-field="unitPrice" ${bitcoin ? "readonly" : ""}></td>
-            <td class="readonly-cell" data-asset-total="${index}">${fmtMoney(total)}</td>
-            <td class="actions"><button class="row-btn" type="button" data-delete-type="assets" data-delete-index="${index}">Delete</button></td>
-          </tr>
-        `;
-      }).join("");
+      if (type === "upper") return w + 5;
+      if (type === "pull") return w + 10;
+      return w + 5;
     }
 
-    function renderLiabilityTable(rows) {
-      const tbody = document.getElementById("liabilityTable");
-      if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="3" class="empty">No rows yet.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = rows.map((row, index) => `
-        <tr data-row-type="liabilities" data-row-index="${index}">
-          <td><input type="text" value="${escapeHtml(row.description)}" data-type="liabilities" data-index="${index}" data-field="description"></td>
-          <td><input class="money-picker-target" type="number" step="1" inputmode="numeric" value="${row.amount === 0 ? "" : Math.round(row.amount)}" data-type="liabilities" data-index="${index}" data-field="amount"></td>
-          <td class="actions"><button class="row-btn" type="button" data-delete-type="liabilities" data-delete-index="${index}">Delete</button></td>
-        </tr>
-      `).join("");
+    function renderSessionForm() {
+      const session = currentSession();
+      document.getElementById("phaseSelect").value = session.phase;
+      document.getElementById("daySelect").value = session.day;
+      document.getElementById("bodyweightInput").value = session.bodyweight;
+      document.getElementById("notesInput").value = session.notes;
+      document.getElementById("unitSelect").value = state.unit;
+      document.getElementById("barWeightInput").value = state.barWeight;
+      document.getElementById("squatWorkWeight").value = state.squatWorkWeight;
+      renderExerciseTable();
+      renderSummary();
+      renderWarmup();
     }
 
-    function updateAssetRowUI(index) {
-      const row = currentMonth().assets[index];
-      const tr = document.querySelector(`tr[data-row-type="assets"][data-row-index="${index}"]`);
-      if (!row || !tr) return;
+    function warmupRows() {
+      const unit = state.unit;
+      const work = safeNumber(state.squatWorkWeight);
+      const bar = safeNumber(state.barWeight || (unit === "kg" ? 20 : 45));
+      const inc = unit === "kg" ? 2.5 : 5;
 
-      const priceInput = tr.querySelector('input[data-field="unitPrice"]');
-      const totalCell = tr.querySelector(`[data-asset-total="${index}"]`);
-      const bitcoin = isBitcoinRow(row);
+      const percRows = [
+        { label: "Set 1", pct: "Bar", reps: "2 × 5", weight: bar },
+        { label: "Set 2", pct: "40%", reps: "1 × 5", weight: Math.max(bar, roundToIncrement(work * 0.40, inc)) },
+        { label: "Set 3", pct: "60%", reps: "1 × 3", weight: Math.max(bar, roundToIncrement(work * 0.60, inc)) },
+        { label: "Set 4", pct: "80%", reps: "1 × 2", weight: Math.max(bar, roundToIncrement(work * 0.80, inc)) },
+        { label: "Set 5", pct: "90%", reps: "1 × 1", weight: Math.max(bar, roundToIncrement(work * 0.90, inc)) }
+      ];
 
-      if (priceInput) {
-        if (bitcoin) {
-          priceInput.readOnly = true;
-          priceInput.value = state.btc200wma === "" ? "" : Math.round(state.btc200wma);
-        } else {
-          priceInput.readOnly = false;
-          priceInput.value = row.unitPrice === "" ? "" : Math.round(row.unitPrice);
-        }
-      }
-
-      if (totalCell) {
-        totalCell.textContent = fmtMoney(assetAmount(row));
-      }
+      return percRows;
     }
 
-    function updateAllAssetRowUI() {
-      currentMonth().assets.forEach((_, index) => updateAssetRowUI(index));
-    }
+    function renderWarmup() {
+      const tbody = document.getElementById("warmupTable");
+      const rows = warmupRows();
+      const unit = state.unit;
+      const inc = unit === "kg" ? "2.5 kg" : "5 lb";
 
-    function renderMonthTotals() {
-      const month = currentMonth();
-      const totalIncome = sumRows(month.income);
-      const totalExpenses = sumRows(month.expenses);
-      const totalAssets = sumRows(month.assets);
-      const totalLiabilities = sumRows(month.liabilities);
-      const passiveIncome = sumPassiveIncome(month.income);
-
-      document.getElementById("passiveIncome").textContent = fmtMoney(passiveIncome);
-      document.getElementById("totalIncome").textContent = fmtMoney(totalIncome);
-      document.getElementById("totalExpenses").textContent = fmtMoney(totalExpenses);
-      document.getElementById("cashflow").textContent = fmtMoney(totalIncome - totalExpenses);
-      document.getElementById("assetsFooterValue").textContent = fmtMoney(totalAssets);
-      document.getElementById("incomeTotalRow").textContent = fmtMoney(totalIncome);
-      document.getElementById("expenseTotalRow").textContent = fmtMoney(totalExpenses);
-      document.getElementById("assetTotalRow").textContent = fmtMoney(totalAssets);
-      document.getElementById("liabilityTotalRow").textContent = fmtMoney(totalLiabilities);
-
-      const btcInput = document.getElementById("btc200wmaInput");
-      if (btcInput) {
-        btcInput.value = state.btc200wma === "" ? "" : Math.round(state.btc200wma);
-      }
-    }
-
-    function renderYearView() {
-      const rows = yearMetrics(state.selectedYear);
-      const tbody = document.getElementById("yearTableBody");
+      document.getElementById("roundingLabel").textContent = inc;
 
       tbody.innerHTML = rows.map(row => `
         <tr>
-          <td>${row.monthName}</td>
-          <td class="num">${fmtMoney(row.totalIncome)}</td>
-          <td class="num">${fmtMoney(row.passiveIncome)}</td>
-          <td class="num">${fmtMoney(row.totalAssets)}</td>
-          <td class="num">${fmtMoney(row.totalLiabilities)}</td>
+          <td>${row.label}</td>
+          <td>${row.pct}</td>
+          <td>${row.reps}</td>
+          <td class="readonly-cell">${fmtWeight(row.weight, unit)}</td>
         </tr>
       `).join("");
-
-      const annualIncome = rows.reduce((sum, r) => sum + r.totalIncome, 0);
-      const annualPassive = rows.reduce((sum, r) => sum + r.passiveIncome, 0);
-      const annualCashflow = rows.reduce((sum, r) => sum + r.cashflow, 0);
-      const yearEndAssets = rows[11].totalAssets;
-      const yearEndLiabilities = rows[11].totalLiabilities;
-
-      document.getElementById("yearIncomeTotal").textContent = fmtMoney(annualIncome);
-      document.getElementById("yearPassiveTotal").textContent = fmtMoney(annualPassive);
-      document.getElementById("yearCashflowTotal").textContent = fmtMoney(annualCashflow);
-      document.getElementById("yearEndAssets").textContent = fmtMoney(yearEndAssets);
-
-      document.getElementById("yearIncomeFooter").textContent = fmtMoney(annualIncome);
-      document.getElementById("yearPassiveFooter").textContent = fmtMoney(annualPassive);
-      document.getElementById("yearAssetsFooter").textContent = fmtMoney(yearEndAssets);
-      document.getElementById("yearLiabilityFooter").textContent = fmtMoney(yearEndLiabilities);
     }
 
-    function renderPeriodLabel() {
-      const label = document.getElementById("periodLabel");
-      if (state.viewMode === "month") {
-        label.textContent = formatMonthLabel(state.selectedMonth);
-      } else {
-        label.textContent = String(state.selectedYear);
+    function renderHistory() {
+      const tbody = document.getElementById("historyTable");
+      if (!state.history.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">No saved sessions yet.</td></tr>';
+        return;
       }
-    }
 
-    function renderViewMode() {
-      const monthView = document.getElementById("monthView");
-      const yearView = document.getElementById("yearView");
-      const toggleBtn = document.getElementById("toggleViewBtn");
+      const sorted = [...state.history].sort((a,b) => a.date < b.date ? 1 : -1);
 
-      if (state.viewMode === "month") {
-        monthView.classList.remove("hidden");
-        yearView.classList.add("hidden");
-        toggleBtn.textContent = "Year View";
-      } else {
-        monthView.classList.add("hidden");
-        yearView.classList.remove("hidden");
-        toggleBtn.textContent = "Month View";
-      }
-    }
-
-    function renderMonthView() {
-      const month = currentMonth();
-      document.getElementById("currencySelect").value = state.currency;
-      renderIncomeExpenseTable("incomeTable", month.income, "income");
-      renderIncomeExpenseTable("expenseTable", month.expenses, "expenses");
-      renderAssetTable(month.assets);
-      renderLiabilityTable(month.liabilities);
-      renderMonthTotals();
+      tbody.innerHTML = sorted.map(item => `
+        <tr>
+          <td>${displayDate(item.date)}</td>
+          <td>${escapeHtml(item.phase)}</td>
+          <td>${escapeHtml(item.day)}</td>
+          <td>${escapeHtml(item.exerciseSummary)}</td>
+          <td class="readonly-cell">${fmtWeight(item.volume, item.unit)}</td>
+          <td class="readonly-cell">${item.completionRate}%</td>
+        </tr>
+      `).join("");
     }
 
     function render() {
-      document.getElementById("currencySelect").value = state.currency;
-      renderPeriodLabel();
+      renderDateLabel();
       renderViewMode();
-
-      if (state.viewMode === "month") {
-        renderMonthView();
+      if (state.viewMode === "session") {
+        renderSessionForm();
       } else {
-        renderYearView();
+        renderHistory();
       }
     }
 
-    function addRow(type) {
-      if (type === "assets") {
-        currentMonth().assets.push(blankAssetRow());
-      } else {
-        currentMonth()[type].push({ id: uid(type.slice(0, 3)), description: "", amount: 0 });
-      }
+    function applyTemplate(phase, day) {
+      const session = currentSession();
+      session.phase = phase;
+      session.day = day;
+      session.exercises = templateFor(phase, day);
       saveState();
       render();
     }
 
-    function deleteRow(type, index) {
-      currentMonth()[type].splice(index, 1);
+    function shiftSelectedDate(days) {
+      const d = new Date(state.selectedDate + "T00:00:00");
+      d.setDate(d.getDate() + days);
+      state.selectedDate = isoDate(d);
+      ensureSessionExists(state.selectedDate);
       saveState();
       render();
     }
 
-    function updateFieldWithoutRerender(type, index, field, value) {
-      const row = currentMonth()[type][index];
-      if (!row) return;
+    function saveCurrentSessionToHistory() {
+      const session = currentSession();
+      const metrics = sessionMetrics(session);
 
-      if (type === "assets") {
-        if (field === "quantity") {
-          row.quantity = value === "" ? "" : safeNumber(value);
-        } else if (field === "unitPrice") {
-          if (!isBitcoinRow(row)) {
-            row.unitPrice = value === "" ? "" : Math.round(safeNumber(value));
-          }
-        } else {
-          row[field] = value;
-        }
-        row.amount = assetAmount(row);
-        updateAssetRowUI(index);
-      } else {
-        if (field === "amount") {
-          row[field] = value === "" ? 0 : Math.round(safeNumber(value));
-        } else {
-          row[field] = value;
-        }
-      }
+      const payload = {
+        id: uid("hist"),
+        date: state.selectedDate,
+        phase: session.phase,
+        day: session.day,
+        bodyweight: session.bodyweight,
+        notes: session.notes,
+        unit: state.unit,
+        volume: metrics.volume,
+        completionRate: metrics.completionRate,
+        exerciseSummary: session.exercises.map(x => x.exercise).filter(Boolean).join(", "),
+        exercises: JSON.parse(JSON.stringify(session.exercises))
+      };
 
+      state.history = state.history.filter(item => !(item.date === payload.date && item.phase === payload.phase && item.day === payload.day));
+      state.history.push(payload);
       saveState();
-      renderMonthTotals();
+      if (state.viewMode === "history") renderHistory();
+      alert("Session saved.");
     }
 
-    function exportMonthCsv() {
-      const month = currentMonth();
-      recalcAssets(month);
-
+    function exportCsv() {
       const rows = [
-        ["MONTH", state.selectedMonth],
-        ["CURRENCY", state.currency],
-        ["BITCOIN 200 WEEK MOVING AVERAGE", state.btc200wma],
+        ["Date", state.selectedDate],
+        ["Phase", currentSession().phase],
+        ["Day", currentSession().day],
+        ["Bodyweight", currentSession().bodyweight],
+        ["Unit", state.unit],
         [],
-        ["INCOME"],
-        ["DESCRIPTION", "AMOUNT"],
-        ...month.income.map(r => [r.description, r.amount]),
-        ["TOTAL INCOME", sumRows(month.income)],
+        ["Exercise", "Sets", "Reps", "Weight", "Completed Sets"],
+        ...currentSession().exercises.map(r => [r.exercise, r.sets, r.reps, r.weight, r.completed]),
         [],
-        ["EXPENSES"],
-        ["DESCRIPTION", "AMOUNT"],
-        ...month.expenses.map(r => [r.description, r.amount]),
-        ["TOTAL EXPENSES", sumRows(month.expenses)],
+        ["Warm-Up Set", "Percent", "Reps", "Weight"],
+        ...warmupRows().map(r => [r.label, r.pct, r.reps, r.weight]),
         [],
-        ["PASSIVE INCOME", sumPassiveIncome(month.income)],
-        ["MONTHLY CASH FLOW", sumRows(month.income) - sumRows(month.expenses)],
-        [],
-        ["ASSETS"],
-        ["DESCRIPTION", "QUANTITY", "PRICE", "TOTAL"],
-        ...month.assets.map(r => [
-          r.description,
-          r.quantity,
-          isBitcoinRow(r) ? state.btc200wma : r.unitPrice,
-          assetAmount(r)
-        ]),
-        ["TOTAL ASSETS", "", "", sumRows(month.assets)],
-        [],
-        ["LIABILITIES"],
-        ["DESCRIPTION", "AMOUNT"],
-        ...month.liabilities.map(r => [r.description, r.amount]),
-        ["TOTAL LIABILITIES", sumRows(month.liabilities)]
+        ["Notes", currentSession().notes]
       ];
 
-      downloadCsv(rows, "financial-statement-" + state.selectedMonth + ".csv");
-    }
-
-    function exportYearCsv() {
-      const rowsData = yearMetrics(state.selectedYear);
-      const annualIncome = rowsData.reduce((sum, r) => sum + r.totalIncome, 0);
-      const annualPassive = rowsData.reduce((sum, r) => sum + r.passiveIncome, 0);
-      const annualCashflow = rowsData.reduce((sum, r) => sum + r.cashflow, 0);
-      const yearEndAssets = rowsData[11].totalAssets;
-      const yearEndLiabilities = rowsData[11].totalLiabilities;
-
-      const rows = [
-        ["YEAR", state.selectedYear],
-        ["CURRENCY", state.currency],
-        [],
-        ["YEAR OVERVIEW"],
-        ["MONTH", "INCOME", "PASSIVE INCOME", "ASSETS", "NET LIABILITIES"],
-        ...rowsData.map(r => [r.monthName, r.totalIncome, r.passiveIncome, r.totalAssets, r.totalLiabilities]),
-        ["YEAR END / TOTALS", annualIncome, annualPassive, yearEndAssets, yearEndLiabilities],
-        [],
-        ["ANNUAL CASH FLOW", annualCashflow]
-      ];
-
-      downloadCsv(rows, "financial-statement-year-" + state.selectedYear + ".csv");
-    }
-
-    function downloadCsv(rows, filename) {
-      const csv = rows.map(row =>
-        row.map(cell => '"' + String(cell ?? "").replace(/"/g, '""') + '"').join(",")
-      ).join("\n");
-
+      const csv = rows.map(row => row.map(cell => '"' + String(cell ?? "").replace(/"/g, '""') + '"').join(",")).join("\n");
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = filename;
+      a.download = "starting-strength-" + state.selectedDate + ".csv";
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
     }
 
-    function openMoneyPicker(targetInput) {
-      if (!targetInput) return;
+    const state = loadState();
 
-      const rawValue = targetInput.value === "" ? 0 : Math.round(safeNumber(targetInput.value));
-      moneyPicker.target = targetInput;
-      moneyPicker.currentValue = rawValue;
-      moneyPicker.title = getPickerTitle(targetInput);
+    document.getElementById("prevDay").addEventListener("click", () => shiftSelectedDate(-1));
+    document.getElementById("nextDay").addEventListener("click", () => shiftSelectedDate(1));
 
-      document.getElementById("pickerTitle").textContent = moneyPicker.title;
-      document.getElementById("pickerDisplay").textContent = fmtMoney(rawValue);
-
-      buildPickerWheel(rawValue);
-      document.getElementById("moneyPickerOverlay").classList.remove("hidden");
-      document.getElementById("moneyPickerOverlay").setAttribute("aria-hidden", "false");
-    }
-
-    function closeMoneyPicker() {
-      document.getElementById("moneyPickerOverlay").classList.add("hidden");
-      document.getElementById("moneyPickerOverlay").setAttribute("aria-hidden", "true");
-      moneyPicker.target = null;
-    }
-
-    function getPickerTitle(input) {
-      if (input.id === "btc200wmaInput") return "Bitcoin 200WMA";
-      const field = input.dataset.field || "amount";
-      if (field === "unitPrice") return "Choose price";
-      return "Choose amount";
-    }
-
-    function buildPickerWheel(centerValue) {
-      const wheel = document.getElementById("pickerWheel");
-      const start = Math.max(moneyPicker.min, centerValue - 100);
-      const end = Math.min(moneyPicker.max, centerValue + 100);
-
-      let html = "";
-      for (let v = start; v <= end; v += moneyPicker.step) {
-        html += `<div class="picker-row${v === centerValue ? " active" : ""}" data-picker-value="${v}">${fmtMoney(v)}</div>`;
-      }
-      wheel.innerHTML = html;
-
-      requestAnimationFrame(() => {
-        const targetRow = wheel.querySelector(`[data-picker-value="${centerValue}"]`);
-        if (targetRow) {
-          const top = targetRow.offsetTop - 88;
-          wheel.scrollTop = top;
-          updatePickerActive();
-        }
-      });
-    }
-
-    function updatePickerActive() {
-      const wheel = document.getElementById("pickerWheel");
-      const rows = Array.from(wheel.querySelectorAll(".picker-row"));
-      if (!rows.length) return;
-
-      const center = wheel.scrollTop + (wheel.clientHeight / 2);
-      let best = rows[0];
-      let bestDist = Infinity;
-
-      rows.forEach(row => {
-        const rowCenter = row.offsetTop + (row.offsetHeight / 2);
-        const dist = Math.abs(center - rowCenter);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = row;
-        }
-      });
-
-      rows.forEach(r => r.classList.remove("active"));
-      best.classList.add("active");
-
-      const value = Math.round(safeNumber(best.dataset.pickerValue));
-      moneyPicker.currentValue = value;
-      document.getElementById("pickerDisplay").textContent = fmtMoney(value);
-    }
-
-    function scrollPickerToValue(value) {
-      const wheel = document.getElementById("pickerWheel");
-      const currentRows = Array.from(wheel.querySelectorAll(".picker-row"));
-      if (!currentRows.length) {
-        buildPickerWheel(value);
-        return;
-      }
-
-      const first = Math.round(safeNumber(currentRows[0].dataset.pickerValue));
-      const last = Math.round(safeNumber(currentRows[currentRows.length - 1].dataset.pickerValue));
-
-      if (value < first + 10 || value > last - 10) {
-        buildPickerWheel(value);
-        return;
-      }
-
-      const row = wheel.querySelector(`[data-picker-value="${value}"]`);
-      if (row) {
-        wheel.scrollTop = row.offsetTop - 88;
-        updatePickerActive();
-      }
-    }
-
-    function applyMoneyPickerValue() {
-      if (!moneyPicker.target) return;
-      const input = moneyPicker.target;
-      input.value = moneyPicker.currentValue === 0 ? "0" : String(moneyPicker.currentValue);
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-      closeMoneyPicker();
-    }
-
-    document.addEventListener("input", function(e){
-      const t = e.target;
-
-      if (state.viewMode !== "month") return;
-
-      if (t.id === "btc200wmaInput") {
-        state.btc200wma = t.value === "" ? "" : Math.round(safeNumber(t.value));
-        recalcAssets(currentMonth());
-        saveState();
-        updateAllAssetRowUI();
-        renderMonthTotals();
-        return;
-      }
-
-      if (!t.matches("input[data-type]")) return;
-
-      updateFieldWithoutRerender(
-        t.dataset.type,
-        Number(t.dataset.index),
-        t.dataset.field,
-        t.value
-      );
-    });
-
-    document.addEventListener("focusin", function(e){
-      const t = e.target;
-      if (state.viewMode !== "month") return;
-      if (!t.matches("input.money-picker-target")) return;
-      if (t.readOnly) return;
-
-      t.blur();
-      openMoneyPicker(t);
-    });
-
-    document.addEventListener("click", function(e){
-      const t = e.target;
-
-      if (t.id === "toggleViewBtn") {
-        if (state.viewMode === "month") {
-          state.viewMode = "year";
-          state.selectedYear = Number(state.selectedMonth.split("-")[0]);
-        } else {
-          state.viewMode = "month";
-          const monthPart = state.selectedMonth.split("-")[1] || "01";
-          state.selectedMonth = state.selectedYear + "-" + monthPart;
-          ensureMonthExists(state.selectedMonth);
-        }
-        saveState();
-        render();
-      }
-
-      if (t.id === "prevPeriod") {
-        if (state.viewMode === "month") {
-          state.selectedMonth = shiftMonth(state.selectedMonth, -1);
-          state.selectedYear = Number(state.selectedMonth.split("-")[0]);
-          ensureMonthExists(state.selectedMonth);
-        } else {
-          state.selectedYear -= 1;
-        }
-        saveState();
-        render();
-      }
-
-      if (t.id === "nextPeriod") {
-        if (state.viewMode === "month") {
-          state.selectedMonth = shiftMonth(state.selectedMonth, 1);
-          state.selectedYear = Number(state.selectedMonth.split("-")[0]);
-          ensureMonthExists(state.selectedMonth);
-        } else {
-          state.selectedYear += 1;
-        }
-        saveState();
-        render();
-      }
-
-      if (state.viewMode === "month") {
-        if (t.id === "addIncome") addRow("income");
-        if (t.id === "addExpense") addRow("expenses");
-        if (t.id === "addAsset") addRow("assets");
-        if (t.id === "addLiability") addRow("liabilities");
-
-        if (t.dataset.deleteType) {
-          deleteRow(t.dataset.deleteType, Number(t.dataset.deleteIndex));
-        }
-      }
-
-      if (t.id === "exportBtn") {
-        if (state.viewMode === "month") {
-          exportMonthCsv();
-        } else {
-          exportYearCsv();
-        }
-      }
-
-      if (t.id === "pickerCancelBtn") {
-        closeMoneyPicker();
-      }
-
-      if (t.id === "pickerDoneBtn") {
-        applyMoneyPickerValue();
-      }
-
-      if (t.id === "moneyPickerOverlay") {
-        closeMoneyPicker();
-      }
-
-      if (t.dataset.pickerJump) {
-        const next = moneyPicker.currentValue + Number(t.dataset.pickerJump);
-        scrollPickerToValue(Math.max(moneyPicker.min, Math.min(moneyPicker.max, next)));
-      }
-
-      if (t.dataset.pickerSet !== undefined) {
-        scrollPickerToValue(Number(t.dataset.pickerSet));
-      }
-    });
-
-    let pickerScrollTimer = null;
-    document.getElementById("pickerWheel").addEventListener("scroll", function(){
-      updatePickerActive();
-      clearTimeout(pickerScrollTimer);
-      pickerScrollTimer = setTimeout(() => {
-        scrollPickerToValue(moneyPicker.currentValue);
-      }, 80);
-    });
-
-    document.getElementById("currencySelect").addEventListener("change", function(e){
-      state.currency = e.target.value;
+    document.getElementById("toggleViewBtn").addEventListener("click", () => {
+      state.viewMode = state.viewMode === "session" ? "history" : "session";
       saveState();
       render();
-      if (!document.getElementById("moneyPickerOverlay").classList.contains("hidden")) {
-        document.getElementById("pickerDisplay").textContent = fmtMoney(moneyPicker.currentValue);
-        buildPickerWheel(moneyPicker.currentValue);
-      }
     });
 
-    ensureMonthExists(state.selectedMonth);
-    state.selectedYear = Number(state.selectedMonth.split("-")[0]);
-    recalcAssets(currentMonth());
-    saveState();
+    document.getElementById("saveSessionBtn").addEventListener("click", saveCurrentSessionToHistory);
+    document.getElementById("exportBtn").addEventListener("click", exportCsv);
+
+    document.getElementById("phaseSelect").addEventListener("change", (e) => {
+      applyTemplate(e.target.value, document.getElementById("daySelect").value);
+    });
+
+    document.getElementById("daySelect").addEventListener("change", (e) => {
+      applyTemplate(document.getElementById("phaseSelect").value, e.target.value);
+    });
+
+    document.getElementById("unitSelect").addEventListener("change", (e) => {
+      state.unit = e.target.value;
+      if (!state.barWeight) state.barWeight = state.unit === "kg" ? 20 : 45;
+      if (state.barWeight === 20 && state.unit === "lb") state.barWeight = 45;
+      if (state.barWeight === 45 && state.unit === "kg") state.barWeight = 20;
+      saveState();
+      render();
+    });
+
+    document.getElementById("bodyweightInput").addEventListener("input", (e) => {
+      currentSession().bodyweight = e.target.value;
+      saveState();
+    });
+
+    document.getElementById("notesInput").addEventListener("input", (e) => {
+      currentSession().notes = e.target.value;
+      saveState();
+    });
+
+    document.getElementById("barWeightInput").addEventListener("input", (e) => {
+      state.barWeight = e.target.value === "" ? "" : safeNumber(e.target.value);
+      saveState();
+      renderWarmup();
+    });
+
+    document.getElementById("squatWorkWeight").addEventListener("input", (e) => {
+      state.squatWorkWeight = e.target.value === "" ? "" : safeNumber(e.target.value);
+      saveState();
+      renderWarmup();
+    });
+
+    document.getElementById("addExercise").addEventListener("click", () => {
+      currentSession().exercises.push(blankExercise());
+      saveState();
+      render();
+    });
+
+    document.addEventListener("input", (e) => {
+      const t = e.target;
+      if (!t.matches("#exerciseTable input")) return;
+
+      const index = Number(t.dataset.index);
+      const field = t.dataset.field;
+      const row = currentSession().exercises[index];
+      if (!row) return;
+
+      if (field === "exercise") row.exercise = t.value;
+      if (field === "sets") row.sets = Math.max(0, safeNumber(t.value));
+      if (field === "reps") row.reps = Math.max(0, safeNumber(t.value));
+      if (field === "weight") row.weight = t.value === "" ? "" : safeNumber(t.value);
+      if (field === "completed") row.completed = Math.max(0, Math.min(safeNumber(t.value), safeNumber(row.sets)));
+
+      saveState();
+      renderSummary();
+    });
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-delete-index]");
+      if (!btn) return;
+      const index = Number(btn.dataset.deleteIndex);
+      currentSession().exercises.splice(index, 1);
+      saveState();
+      render();
+    });
+
     render();
   </script>
 </body>
