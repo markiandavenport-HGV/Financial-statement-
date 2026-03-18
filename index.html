@@ -112,6 +112,7 @@
       border-radius:12px;
       box-shadow:none;
       font-size:14px;
+      min-width:0;
     }
 
     .btn{
@@ -188,9 +189,29 @@
     .box-body{padding:0}
     .box-pad{padding:16px}
 
-    .compact-controls{
+    .today-card{
+      margin-bottom:14px;
+    }
+
+    .today-grid{
       display:grid;
-      grid-template-columns:1fr 1fr 1fr auto auto auto;
+      grid-template-columns:1.2fr .9fr .9fr;
+      gap:16px;
+      align-items:start;
+    }
+
+    .today-main .summary-value{
+      font-size:32px;
+    }
+
+    .today-sub{
+      border-left:1px solid #ececf0;
+      padding-left:16px;
+    }
+
+    .builder-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr 1fr 1fr;
       gap:10px;
       align-items:end;
     }
@@ -209,65 +230,6 @@
       color:var(--muted);
       margin-bottom:6px;
       font-weight:700;
-    }
-
-    .mini-control{
-      min-width:0;
-    }
-
-    .check-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:999px;
-      padding:10px 14px;
-      font-size:14px;
-      cursor:pointer;
-      user-select:none;
-      white-space:nowrap;
-      min-height:44px;
-    }
-
-    .check-pill:hover{
-      border-color:var(--line-strong);
-      background:#fafafc;
-    }
-
-    .check-pill input{
-      appearance:none;
-      -webkit-appearance:none;
-      width:18px;
-      height:18px;
-      border:1.5px solid var(--line-strong);
-      border-radius:999px;
-      background:#fff;
-      position:relative;
-      margin:0;
-      flex:0 0 auto;
-      cursor:pointer;
-    }
-
-    .check-pill input:checked{
-      border-color:var(--accent);
-      background:var(--accent);
-    }
-
-    .check-pill input:checked::after{
-      content:"";
-      position:absolute;
-      left:5px;
-      top:2px;
-      width:4px;
-      height:8px;
-      border:solid #fff;
-      border-width:0 2px 2px 0;
-      transform:rotate(45deg);
-    }
-
-    .check-pill.compact{
-      padding:8px 12px;
     }
 
     table{
@@ -335,6 +297,7 @@
     .actions{
       white-space:nowrap;
       width:1%;
+      text-align:right;
     }
 
     .row-btn{
@@ -405,10 +368,6 @@
       font-size:12px;
       margin-top:4px;
       line-height:1.35;
-    }
-
-    .today-card{
-      margin-bottom:14px;
     }
 
     .cashflow-row{
@@ -512,24 +471,31 @@
     }
 
     .checkbox-wrap{
+      padding:0 !important;
+    }
+
+    .checkbox-cell{
       display:flex;
-      justify-content:center;
       align-items:center;
+      justify-content:center;
+      min-height:54px;
+      width:100%;
     }
 
     .exercise-check{
       appearance:none;
       -webkit-appearance:none;
-      width:20px !important;
-      height:20px !important;
+      width:22px !important;
+      height:22px !important;
       border:1.5px solid var(--line-strong) !important;
       border-radius:999px !important;
       background:#fff !important;
       position:relative;
-      margin:0 auto;
+      margin:0;
       cursor:pointer;
       padding:0 !important;
       box-shadow:none !important;
+      flex:0 0 auto;
     }
 
     .exercise-check:hover{
@@ -545,10 +511,10 @@
     .exercise-check:checked::after{
       content:"";
       position:absolute;
-      left:6px;
-      top:2px;
+      left:7px;
+      top:3px;
       width:5px;
-      height:9px;
+      height:10px;
       border:solid #fff;
       border-width:0 2px 2px 0;
       transform:rotate(45deg);
@@ -585,8 +551,16 @@
     }
 
     @media (max-width:1100px){
-      .compact-controls{
-        grid-template-columns:1fr 1fr 1fr 1fr;
+      .builder-grid{
+        grid-template-columns:1fr 1fr 1fr;
+      }
+      .today-grid{
+        grid-template-columns:1fr;
+      }
+      .today-sub{
+        border-left:0;
+        padding-left:0;
+        padding-top:8px;
       }
     }
 
@@ -618,7 +592,7 @@
         font-size:24px;
       }
 
-      .compact-controls,
+      .builder-grid,
       .warmup-controls{
         grid-template-columns:1fr 1fr;
       }
@@ -634,7 +608,7 @@
     }
 
     @media (max-width:560px){
-      .compact-controls,
+      .builder-grid,
       .warmup-controls{
         grid-template-columns:1fr;
       }
@@ -666,17 +640,31 @@
         <div class="planner-layout">
           <div>
             <div class="summary-card today-card">
-              <div class="summary-label">Today’s Workout</div>
-              <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
-              <div class="summary-note" id="templateNote">Standard novice progression template.</div>
+              <div class="today-grid">
+                <div class="today-main">
+                  <div class="summary-label">Today’s Workout</div>
+                  <div class="summary-value" id="selectedSession">Phase 1 / Day A</div>
+                  <div class="summary-note" id="templateNote">Standard novice progression template.</div>
+                </div>
+                <div class="today-sub">
+                  <div class="summary-label">Session Status</div>
+                  <div class="summary-value" id="sessionStatus">Planned</div>
+                  <div class="summary-note" id="sessionStatusNote">No lifts marked complete yet.</div>
+                </div>
+                <div class="today-sub">
+                  <div class="summary-label">Current Template</div>
+                  <div class="summary-value" id="sexSummary">Male</div>
+                  <div class="summary-note" id="sexSummaryNote">3 × 5 main lifts.</div>
+                </div>
+              </div>
             </div>
 
             <div class="box" style="margin-bottom:14px;">
               <div class="box-title">Session Builder</div>
               <div class="box-body">
                 <div class="box-pad">
-                  <div class="compact-controls">
-                    <div class="mini-control">
+                  <div class="builder-grid">
+                    <div>
                       <label class="control-label" for="unitSelect">Units</label>
                       <select id="unitSelect" class="select">
                         <option value="kg">kg</option>
@@ -684,7 +672,7 @@
                       </select>
                     </div>
 
-                    <div class="mini-control">
+                    <div>
                       <label class="control-label" for="phaseSelect">Workout Type</label>
                       <select id="phaseSelect" class="select">
                         <option value="Phase 1">Phase 1</option>
@@ -693,7 +681,7 @@
                       </select>
                     </div>
 
-                    <div class="mini-control">
+                    <div>
                       <label class="control-label" for="daySelect">Day</label>
                       <select id="daySelect" class="select">
                         <option value="Day A">Day A</option>
@@ -701,25 +689,17 @@
                       </select>
                     </div>
 
-                    <div class="mini-control">
+                    <div>
+                      <label class="control-label" for="sexSelect">Sex</label>
+                      <select id="sexSelect" class="select">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                      </select>
+                    </div>
+
+                    <div>
                       <label class="control-label" for="bodyweightInput">Bodyweight</label>
                       <input id="bodyweightInput" class="field" type="number" step="0.1" placeholder="Optional">
-                    </div>
-
-                    <div class="mini-control">
-                      <label class="control-label">Sex</label>
-                      <label class="check-pill compact">
-                        <input type="checkbox" id="maleCheckbox">
-                        <span>Male</span>
-                      </label>
-                    </div>
-
-                    <div class="mini-control">
-                      <label class="control-label">&nbsp;</label>
-                      <label class="check-pill compact">
-                        <input type="checkbox" id="femaleCheckbox">
-                        <span>Female</span>
-                      </label>
                     </div>
                   </div>
                 </div>
@@ -778,15 +758,15 @@
             </div>
 
             <div class="summary-card">
-              <div class="summary-label">Session Status</div>
-              <div class="summary-value" id="sessionStatus">Planned</div>
-              <div class="summary-note" id="sessionStatusNote">No lifts marked complete yet.</div>
+              <div class="summary-label">Volume Unit</div>
+              <div class="summary-value" id="volumeUnitCard">kg</div>
+              <div class="summary-note">Used for weights, warm-ups, and volume.</div>
             </div>
 
             <div class="summary-card">
-              <div class="summary-label">Current Template</div>
-              <div class="summary-value" id="sexSummary">Male</div>
-              <div class="summary-note" id="sexSummaryNote">3 × 5 main lifts.</div>
+              <div class="summary-label">Tracking</div>
+              <div class="summary-value" id="trackingCard">Per Lift</div>
+              <div class="summary-note">Tick each completed exercise once.</div>
             </div>
           </div>
         </div>
@@ -852,7 +832,7 @@
 
                 <div class="summary-label">Female option</div>
                 <div class="summary-note" style="font-size:14px;line-height:1.5;">
-                  Female templates use 5 × 3 on the main lifts, replace power clean with RDL, and use deadlift for 2 × 3.
+                  Female templates use 5 × 3 main lifts, deadlift 2 × 3, and RDL instead of power clean.
                 </div>
               </div>
             </div>
@@ -910,7 +890,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "starting-strength-tracker-v4";
+    const STORAGE_KEY = "starting-strength-tracker-v5";
 
     function uid(prefix) {
       return prefix + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -1161,7 +1141,7 @@
           <td><input type="number" data-index="${index}" data-field="sets" value="${row.sets}"></td>
           <td><input type="number" data-index="${index}" data-field="reps" value="${row.reps}"></td>
           <td><input type="number" step="0.1" data-index="${index}" data-field="weight" value="${row.weight === '' ? '' : row.weight}"></td>
-          <td class="checkbox-wrap"><input class="exercise-check" type="checkbox" data-index="${index}" data-field="completed" ${row.completed ? "checked" : ""}></td>
+          <td class="checkbox-wrap"><div class="checkbox-cell"><input class="exercise-check" type="checkbox" data-index="${index}" data-field="completed" ${row.completed ? "checked" : ""}></div></td>
           <td class="actions"><button class="row-btn" type="button" data-delete-index="${index}">Delete</button></td>
         </tr>
       `).join("");
@@ -1216,9 +1196,6 @@
       if (isFemale) templateNote = "Female template uses 5 × 3 main lifts, deadlift 2 × 3, and RDL instead of power clean.";
       document.getElementById("templateNote").textContent = templateNote;
 
-      document.getElementById("exerciseCount").textContent = exercises.length;
-      document.getElementById("exerciseBreakdown").textContent = exercises.map(x => x.exercise).filter(Boolean).join(", ") || "0 planned movements.";
-
       let status = "Planned";
       let statusNote = "No lifts marked complete yet.";
       if (metrics.completionRate > 0 && metrics.completionRate < 100) {
@@ -1236,6 +1213,9 @@
       document.getElementById("sexSummary").textContent = isFemale ? "Female" : "Male";
       document.getElementById("sexSummaryNote").textContent = isFemale ? "5 × 3 main lifts. Deadlift 2 × 3." : "3 × 5 main lifts.";
 
+      document.getElementById("exerciseCount").textContent = exercises.length;
+      document.getElementById("exerciseBreakdown").textContent = exercises.map(x => x.exercise).filter(Boolean).join(", ") || "0 planned movements.";
+      document.getElementById("volumeUnitCard").textContent = unit;
       document.getElementById("totalSets").textContent = metrics.totalSets;
       document.getElementById("totalReps").textContent = metrics.totalReps;
       document.getElementById("totalWeight").textContent = exercises.some(r => r.weight !== "") ? unit : "—";
@@ -1260,13 +1240,12 @@
       const session = currentSession();
       document.getElementById("phaseSelect").value = session.phase;
       document.getElementById("daySelect").value = session.day;
+      document.getElementById("sexSelect").value = session.sex;
       document.getElementById("bodyweightInput").value = session.bodyweight;
       document.getElementById("notesInput").value = session.notes;
       document.getElementById("unitSelect").value = state.unit;
       document.getElementById("barWeightInput").value = state.barWeight;
       document.getElementById("squatWorkWeight").value = state.squatWorkWeight;
-      document.getElementById("maleCheckbox").checked = session.sex === "male";
-      document.getElementById("femaleCheckbox").checked = session.sex === "female";
       renderExerciseTable();
       renderSummary();
       renderWarmup();
@@ -1435,29 +1414,15 @@
     document.getElementById("exportBtn").addEventListener("click", exportCsv);
 
     document.getElementById("phaseSelect").addEventListener("change", (e) => {
-      applyTemplate(e.target.value, document.getElementById("daySelect").value, currentSession().sex);
+      applyTemplate(e.target.value, document.getElementById("daySelect").value, document.getElementById("sexSelect").value);
     });
 
     document.getElementById("daySelect").addEventListener("change", (e) => {
-      applyTemplate(document.getElementById("phaseSelect").value, e.target.value, currentSession().sex);
+      applyTemplate(document.getElementById("phaseSelect").value, e.target.value, document.getElementById("sexSelect").value);
     });
 
-    document.getElementById("maleCheckbox").addEventListener("change", (e) => {
-      if (!e.target.checked) {
-        e.target.checked = true;
-        return;
-      }
-      document.getElementById("femaleCheckbox").checked = false;
-      applyTemplate(document.getElementById("phaseSelect").value, document.getElementById("daySelect").value, "male");
-    });
-
-    document.getElementById("femaleCheckbox").addEventListener("change", (e) => {
-      if (!e.target.checked) {
-        e.target.checked = true;
-        return;
-      }
-      document.getElementById("maleCheckbox").checked = false;
-      applyTemplate(document.getElementById("phaseSelect").value, document.getElementById("daySelect").value, "female");
+    document.getElementById("sexSelect").addEventListener("change", (e) => {
+      applyTemplate(document.getElementById("phaseSelect").value, document.getElementById("daySelect").value, e.target.value);
     });
 
     document.getElementById("unitSelect").addEventListener("change", (e) => {
